@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 export const Integration: React.FC = () => {
-  const [activeCodeTab, setActiveCodeTab] = useState<'javascript' | 'nodejs' | 'python' | 'go' | 'java' | 'php' | 'curl'>('javascript');
+  const [activeCodeTab, setActiveCodeTab] = useState<'javascript' | 'nodejs' | 'python' | 'go' | 'java' | 'php' | 'curl' | 'supabase'>('javascript');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   
   const [keys, setKeys] = useState({
@@ -201,7 +201,32 @@ function verifyShieldToken($token, $ip) {
     "secret": "${keys.secretKey}",
     "token": "vmt_live_token_here",
     "ip": "203.0.113.195"
-  }'`
+  }'`,
+
+    supabase: `// Initialize Supabase Client ( ojcvvtyaebdodmegwqan.supabase.co )
+import { createClient } from '@supabase/supabase-js'
+
+const supabase = createClient(
+  'https://ojcvvtyaebdodmegwqan.supabase.co',
+  'YOUR_SUPABASE_ANON_KEY'
+)
+
+// Trigger OAuth sign-in with custom VitaShield provider (vitamind-ai)
+async function signInWithVitaShield() {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'custom:vitamind-ai',
+    options: {
+      redirectTo: 'https://vitashield.sleepsomno.com/dashboard',
+      scopes: 'openid email profile'
+    }
+  })
+  
+  if (error) {
+    console.error('Custom OAuth login failed:', error.message);
+  } else {
+    console.log('Redirecting to custom VitaShield auth gateway...');
+  }
+}`
   };
 
   return (
@@ -312,7 +337,7 @@ function verifyShieldToken($token, $ip) {
           <div className="code-panel" style={{ marginTop: '1.25rem' }}>
             <div className="code-header">
               <div className="code-tabs">
-                {(['javascript', 'nodejs', 'python', 'go', 'java', 'php', 'curl'] as const).map((tab) => (
+                {(['javascript', 'nodejs', 'python', 'go', 'java', 'php', 'curl', 'supabase'] as const).map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveCodeTab(tab)}
