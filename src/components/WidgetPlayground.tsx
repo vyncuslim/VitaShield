@@ -87,24 +87,24 @@ export const WidgetPlayground: React.FC<WidgetPlaygroundProps> = ({ config, onAd
       addTerminalLog('SECURE GATEWAY: Connection established. Routing metadata packet to Risk Engine...');
       
       if (method === 'behavioral_telemetry') {
-        addTerminalLog('RISK ENGINE: Scoring telemetry payload -> Risk Score: 12/100 (Safe range: 0-30).');
-        addTerminalLog('VERIFICATION ENGINE: Analysis complete -> Classification: HUMAN.');
+        addTerminalLog('RISK ENGINE V2: Scoring client telemetry... Risk Score: 12/100, Trust Score: 92/100, Reputation Score: 94/100.');
+        addTerminalLog('VERIFICATION ENGINE: Classification -> HUMAN. Adaptive Challenge state -> SILENT.');
         addTerminalLog('SECURE GATEWAY: Decision -> ALLOW. Form submission authorized silently.');
         simulateInvisibleTelemetry();
       } else if (method === 'captcha_3d') {
-        addTerminalLog('RISK ENGINE: Scoring telemetry payload -> Risk Score: 48/100 (Medium range: 31-70).');
-        addTerminalLog('VERIFICATION ENGINE: Analysis complete -> Classification: SUSPECT/BOT_MARKER_FOUND.');
-        addTerminalLog('SECURE GATEWAY: Decision -> CHALLENGE. Directing client to 3D CAPTCHA module.');
+        addTerminalLog('RISK ENGINE V2: Scoring client telemetry... Risk Score: 48/100, Trust Score: 88/100, Reputation Score: 90/100.');
+        addTerminalLog('VERIFICATION ENGINE: Classification -> SUSPECT. Adaptive Challenge state -> INTERACTIVE_SLIDER.');
+        addTerminalLog('SECURE GATEWAY: Decision -> CHALLENGE. Directing client to slider challenge alignment...');
         simulate3DCaptcha();
       } else if (method === 'biometric_scan') {
-        addTerminalLog('RISK ENGINE: Scoring telemetry payload -> Risk Score: 62/100 (Medium range: 31-70).');
-        addTerminalLog('VERIFICATION ENGINE: Analysis complete -> Classification: UNKNOWN_INTEGRITY.');
-        addTerminalLog('SECURE GATEWAY: Decision -> CHALLENGE. Requesting client biometric facial geometric check.');
+        addTerminalLog('RISK ENGINE V2: Scoring client telemetry... Risk Score: 62/100, Trust Score: 85/100, Reputation Score: 88/100.');
+        addTerminalLog('VERIFICATION ENGINE: Classification -> HIGH_RISK. Adaptive Challenge state -> FACIAL_GEOMETRIC_SCAN.');
+        addTerminalLog('SECURE GATEWAY: Decision -> CHALLENGE. Requesting biometric facial sweep...');
         simulateBiometricScan();
       } else if (method === 'cryptographic_pow') {
-        addTerminalLog('RISK ENGINE: Scoring telemetry payload -> Risk Score: 68/100 (Medium range: 31-70).');
-        addTerminalLog('VERIFICATION ENGINE: Analysis complete -> Classification: REPETITIVE_REQUESTS_SUSPECTED.');
-        addTerminalLog('SECURE GATEWAY: Decision -> CHALLENGE. Requesting client cryptographic Proof-of-Work.');
+        addTerminalLog('RISK ENGINE V2: Scoring client telemetry... Risk Score: 68/100, Trust Score: 78/100, Reputation Score: 80/100.');
+        addTerminalLog('VERIFICATION ENGINE: Classification -> AUTOMATED_THREAT. Adaptive Challenge state -> CLIENT_POW_HASH.');
+        addTerminalLog('SECURE GATEWAY: Decision -> CHALLENGE. Initializing cryptographic Proof-of-Work...');
         simulateProofOfWork();
       }
     }, 600);
@@ -479,35 +479,35 @@ export const WidgetPlayground: React.FC<WidgetPlaygroundProps> = ({ config, onAd
                     {`// POST /v1/verify response payload:
 {
   "success": true,
-  "client_sdk_collection": {
-    "device_info": {
-      "screen_resolution": "2560x1440",
-      "hardware_concurrency": 8,
-      "device_memory": 16
+  "decision": "allow",
+  "scores": {
+    "risk_score": ${currentMethod === 'behavioral_telemetry' ? 12 : currentMethod === 'captcha_3d' ? 48 : currentMethod === 'biometric_scan' ? 62 : 68},
+    "trust_score": ${currentMethod === 'behavioral_telemetry' ? 92 : currentMethod === 'captcha_3d' ? 88 : currentMethod === 'biometric_scan' ? 85 : 78},
+    "reputation_score": ${currentMethod === 'behavioral_telemetry' ? 94 : currentMethod === 'captcha_3d' ? 90 : currentMethod === 'biometric_scan' ? 88 : 80}
+  },
+  "detection_details": {
+    "is_ai_agent": false,
+    "agent_type": "none",
+    "device_anomalies": ${
+      currentMethod === 'behavioral_telemetry' ? '[]' :
+      currentMethod === 'captcha_3d' ? '["automated_user_agent_signature"]' :
+      currentMethod === 'biometric_scan' ? '["headless_screen_dimensions_zeroed"]' :
+      '["navigator_webdriver_active"]'
     },
-    "browser_info": {
-      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/126.0.0.0",
-      "locales": ["zh-TW", "en-US"],
-      "timezone": "Asia/Taipei"
+    "behavior_flags": ${
+      currentMethod === 'behavioral_telemetry' ? '[]' :
+      currentMethod === 'captcha_3d' ? '["abnormally_low_mouse_dynamics"]' :
+      currentMethod === 'biometric_scan' ? '["abnormally_low_mouse_dynamics"]' :
+      '["zero_mouse_kinetics"]'
     },
-    "user_behavior": {
-      "mouse_click_intervals_ms": [120, 240, 80],
-      "keystroke_cadence_score": 92
+    "network_flags": ${
+      currentMethod === 'behavioral_telemetry' ? '[]' :
+      currentMethod === 'captcha_3d' ? '[]' :
+      currentMethod === 'biometric_scan' ? '["forwarded_proxy_detected"]' :
+      '["datacenter_asn_subnet"]'
     }
   },
-  "risk_engine": {
-    "score": ${currentMethod === 'behavioral_telemetry' ? 12 : currentMethod === 'captcha_3d' ? 48 : currentMethod === 'biometric_scan' ? 62 : 68},
-    "level": "${currentMethod === 'behavioral_telemetry' ? 'Safe (0-30)' : 'Medium (31-70)'}"
-  },
-  "verification_engine": {
-    "classification": "human",
-    "challenge_completed": "${currentMethod}"
-  },
-  "secure_gateway_decision": {
-    "action": "allow",
-    "gateway_code": "ALLOW_CLEARED_SESSION",
-    "timestamp": "${new Date().toISOString()}"
-  }
+  "timestamp": "${new Date().toISOString()}"
 }`}
                   </div>
                 )}

@@ -41,45 +41,97 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const clientIp = ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
     const userAgent = fingerprint.userAgent || req.headers['user-agent'] || '';
 
-    // 2. Run Layered Security Heuristics
-    let riskScore = 10; // Base safe score
-    let reasons: string[] = [];
+    // 2. Run Risk Engine v2 Layered Security Models
+    let riskScore = 0;
+    let trustScore = 100;
+    let reputationScore = 95;
+    
+    let isAiAgent = false;
+    let agentType = 'none';
+    let deviceAnomalies: string[] = [];
+    let behaviorFlags: string[] = [];
+    let networkFlags: string[] = [];
 
-    // Layer 1 - User Agent / Headless checks
-    const botPatterns = [/headless/i, /puppeteer/i, /playwright/i, /selenium/i, /webdriver/i, /openai/i, /chatgpt/i, /python/i, /curl/i, /wget/i];
-    const isBotUA = botPatterns.some(pattern => pattern.test(userAgent));
+    // Layer 1 - Device Risk checks
+    const aiAgentPatterns = [
+      /openai/i, /gptbot/i, /chatgpt/i, /chat-gpt/i, /claude/i, /anthropic/i,
+      /google-extended/i, /googlebot/i, /bingbot/i, /crawler/i, /spider/i,
+      /python-urllib/i, /axios/i, /headless/i, /puppeteer/i, /playwright/i,
+      /selenium/i, /webdriver/i, /operator/i
+    ];
+    
+    const isBotUA = aiAgentPatterns.some(pattern => pattern.test(userAgent));
     if (isBotUA) {
-      riskScore += 65;
-      reasons.push('automated_user_agent_signature');
+      isAiAgent = true;
+      riskScore += 70;
+      deviceAnomalies.push('automated_ai_agent_signature');
+      
+      if (/openai|operator|gpt/i.test(userAgent)) {
+        agentType = 'openai_operator';
+      } else if (/claude|anthropic/i.test(userAgent)) {
+        agentType = 'claude_operator';
+      } else {
+        agentType = 'automation_agent';
+      }
     }
 
-    // Layer 2 - Client integrity details
     if (fingerprint.screenHeight === 0 || fingerprint.screenWidth === 0) {
-      riskScore += 20;
-      reasons.push('headless_screen_dimensions');
+      riskScore += 25;
+      deviceAnomalies.push('headless_screen_dimensions_zeroed');
     }
     if (fingerprint.webdriverActive === true) {
-      riskScore += 40;
-      reasons.push('navigator_webdriver_active');
+      isAiAgent = true;
+      riskScore += 45;
+      deviceAnomalies.push('navigator_webdriver_active');
     }
 
-    // Layer 3 - Behavior Scan kinetics check
-    if (behavior.mouseEventsCount === 0 && !fingerprint.isMobile) {
-      riskScore += 35;
-      reasons.push('zero_mouse_kinetics_detected');
-    } else if (behavior.mouseEventsCount > 0 && behavior.mouseEventsCount < 3) {
-      riskScore += 15;
-      reasons.push('abnormally_low_mouse_dynamics');
+    // Layer 2 - Behavior Trust checks (Kinetic Telemetry)
+    const mouseEvents = behavior.mouseEventsCount || 0;
+    const keyPresses = behavior.keyPressesCount || 0;
+    const scrolls = behavior.scrollsCount || 0;
+
+    if (mouseEvents === 0 && !fingerprint.isMobile) {
+      trustScore -= 50;
+      behaviorFlags.push('zero_mouse_kinetics');
+    } else if (mouseEvents > 0 && mouseEvents < 3) {
+      trustScore -= 20;
+      behaviorFlags.push('abnormally_low_mouse_dynamics');
+    }
+    
+    if (keyPresses === 0 && !fingerprint.isMobile) {
+      trustScore -= 15;
+      behaviorFlags.push('zero_keystroke_cadence');
+    }
+    if (scrolls === 0) {
+      trustScore -= 10;
+      behaviorFlags.push('no_page_scroll_activity');
     }
 
-    // Cap score at 100
-    riskScore = Math.min(riskScore, 100);
+    // Layer 3 - Network Reputation checks
+    const isHostingIP = /^(10\.|172\.|192\.|127\.)/.test(clientIp) === false && Math.random() > 0.85; // Simulated proxy lookup
+    if (isHostingIP) {
+      reputationScore -= 30;
+      networkFlags.push('datacenter_asn_subnet');
+    }
+    if (req.headers['x-forwarded-for']) {
+      reputationScore -= 15;
+      networkFlags.push('forwarded_proxy_detected');
+    }
+    if (isBotUA) {
+      reputationScore -= 50;
+      networkFlags.push('ai_agent_crawler_network');
+    }
 
-    // 3. Make Gate Decisions
+    // Normalize and cap scores between 0 and 100
+    riskScore = Math.min(Math.max(riskScore, 0), 100);
+    trustScore = Math.min(Math.max(trustScore, 0), 100);
+    reputationScore = Math.min(Math.max(reputationScore, 0), 100);
+
+    // 3. Make Adaptive Gate Decisions
     let decision: 'allow' | 'challenge' | 'block' = 'allow';
-    if (riskScore > 60) {
+    if (riskScore >= 60 || isAiAgent) {
       decision = 'block';
-    } else if (riskScore > 20) {
+    } else if (riskScore > 20 || trustScore < 65 || reputationScore < 75) {
       decision = 'challenge';
     }
 
@@ -122,13 +174,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                   screenWidth: fingerprint.screenWidth,
                   screenHeight: fingerprint.screenHeight,
                   timezone: fingerprint.timezone,
-                  webdriver: fingerprint.webdriverActive
+                  webdriver: fingerprint.webdriverActive,
+                  deviceAnomalies,
+                  networkFlags,
+                  reputationScore
                 },
                 behavior_metrics: {
-                  mouseEvents: behavior.mouseEventsCount,
-                  keyPresses: behavior.keyPressesCount,
-                  scrolls: behavior.scrollsCount,
-                  anomalies: reasons
+                  mouseEvents,
+                  keyPresses,
+                  scrolls,
+                  behaviorFlags,
+                  trustScore
                 }
               })
             });
@@ -139,20 +195,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // 5. Output Verification Payload Response
+    // 5. Output Risk Engine v2 Verification Payload Response
     return res.status(200).json({
       success: true,
-      human_score: 100 - riskScore,
-      risk_level: riskScore > 60 ? 'high' : riskScore > 20 ? 'medium' : 'low',
       decision,
+      scores: {
+        risk_score: riskScore,
+        trust_score: trustScore,
+        reputation_score: reputationScore
+      },
+      detection_details: {
+        is_ai_agent: isAiAgent,
+        agent_type: agentType,
+        device_anomalies: deviceAnomalies,
+        behavior_flags: behaviorFlags,
+        network_flags: networkFlags
+      },
+      // Backwards compatibility elements
+      human_score: trustScore,
+      risk_level: riskScore >= 60 ? 'high' : riskScore > 20 ? 'medium' : 'low',
       trust_and_reputation: {
-        trust_score: Math.max(0, 100 - riskScore - 5),
-        reputation: riskScore > 60 ? 'dangerous' : riskScore > 20 ? 'suspicious' : 'excellent',
-        device_integrity: riskScore > 60 ? 'compromised' : 'verified_device'
+        trust_score: trustScore,
+        reputation: reputationScore >= 80 ? 'excellent' : reputationScore >= 50 ? 'suspicious' : 'dangerous',
+        device_integrity: riskScore >= 60 ? 'compromised' : 'verified_device'
       },
       ai_agent_detection: {
-        is_ai_agent: isBotUA,
-        agent_type: isBotUA ? 'crawler_or_operator' : 'none',
+        is_ai_agent: isAiAgent,
+        agent_type: agentType,
         automation_likelihood: riskScore / 100
       }
     });
