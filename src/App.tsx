@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
 import { LogsTable } from './components/LogsTable';
@@ -105,6 +105,54 @@ function App() {
   });
 
   const [logs, setLogs] = useState<VerificationLog[]>(INITIAL_LOGS);
+
+  // Single Sign-On (SSO) & Shared Session handler for sleepsomno.com users
+  useEffect(() => {
+    // 1. Intercept URL redirect query parameters from sleepsomno.com
+    const params = new URLSearchParams(window.location.search);
+    const ssoToken = params.get('sso_token') || params.get('access_token');
+    const ssoEmail = params.get('email') || params.get('user_email');
+
+    if (ssoToken && ssoEmail) {
+      const session = {
+        accessToken: ssoToken,
+        user: { email: ssoEmail },
+        sso: true,
+        source: 'sleepsomno.com redirect'
+      };
+      localStorage.setItem('vms-auth-session', JSON.stringify(session));
+      setUser(session);
+      setViewMode('console');
+      setActiveTab('dashboard');
+
+      // Strip credentials from address bar quietly to avoid token leaks
+      const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+      window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+      return;
+    }
+
+    // 2. Read shared root domain session cookies (e.g. .sleepsomno.com)
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return undefined;
+    };
+
+    const sharedJwt = getCookie('sleepsomno_jwt') || getCookie('sb-access-token');
+    if (sharedJwt && !user) {
+      const session = {
+        accessToken: sharedJwt,
+        user: { email: 'member@sleepsomno.com' },
+        sso: true,
+        source: 'sleepsomno.com cookie'
+      };
+      localStorage.setItem('vms-auth-session', JSON.stringify(session));
+      setUser(session);
+      setViewMode('console');
+      setActiveTab('dashboard');
+    }
+  }, [user]);
 
   // Appends verification telemetry dynamically from widget triggers
   const handleAddLog = (
