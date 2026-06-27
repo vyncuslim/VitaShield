@@ -3,7 +3,7 @@ import type { ShieldConfig } from '../types';
 
 interface SettingsProps {
   config: ShieldConfig;
-  setConfig: React.Dispatch<React.SetStateAction<ShieldConfig>>;
+  setConfig: (config: ShieldConfig) => void;
 }
 
 export const Settings: React.FC<SettingsProps> = ({ config, setConfig }) => {

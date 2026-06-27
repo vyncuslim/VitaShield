@@ -104,7 +104,53 @@ function App() {
     blockIpList: []
   });
 
-  const [logs, setLogs] = useState<VerificationLog[]>(INITIAL_LOGS);
+  const [logs, setLogs] = useState<VerificationLog[]>([]);
+
+  // Scopes logs and settings by logged-in user email (Each user sees their own)
+  useEffect(() => {
+    if (!user) {
+      setLogs([]);
+      setConfig({
+        preset: 'general',
+        strictness: 'medium',
+        forcedMethod: 'auto',
+        bypassIpList: ['127.0.0.1'],
+        blockIpList: []
+      });
+      return;
+    }
+    const email = user.user?.email || user.email || 'guest';
+    
+    // Load scoped logs
+    const cachedLogs = localStorage.getItem(`vms_logs_${email}`);
+    if (cachedLogs) {
+      try {
+        setLogs(JSON.parse(cachedLogs));
+      } catch {
+        setLogs(INITIAL_LOGS);
+      }
+    } else {
+      setLogs(INITIAL_LOGS);
+      localStorage.setItem(`vms_logs_${email}`, JSON.stringify(INITIAL_LOGS));
+    }
+
+    // Load scoped config
+    const cachedConfig = localStorage.getItem(`vms_config_${email}`);
+    if (cachedConfig) {
+      try {
+        setConfig(JSON.parse(cachedConfig));
+      } catch {}
+    }
+  }, [user]);
+
+  // Hook to persist config updates to localStorage
+  const handleUpdateConfig = (newConfig: ShieldConfig) => {
+    setConfig(newConfig);
+    if (user) {
+      const email = user.user?.email || user.email || 'guest';
+      localStorage.setItem(`vms_config_${email}`, JSON.stringify(newConfig));
+    }
+  };
 
   // Single Sign-On (SSO) & Shared Session handler for sleepsomno.com users
   useEffect(() => {
@@ -173,7 +219,14 @@ function App() {
       riskScore: score
     };
 
-    setLogs((prev) => [newLog, ...prev]);
+    setLogs((prev) => {
+      const updated = [newLog, ...prev];
+      if (user) {
+        const email = user.user?.email || user.email || 'guest';
+        localStorage.setItem(`vms_logs_${email}`, JSON.stringify(updated));
+      }
+      return updated;
+    });
   };
 
   const renderContent = () => {
@@ -187,7 +240,7 @@ function App() {
       case 'integration':
         return <Integration />;
       case 'settings':
-        return <Settings config={config} setConfig={setConfig} />;
+        return <Settings config={config} setConfig={handleUpdateConfig} />;
       case 'specs':
         return <SystemSpecs />;
       case 'rules':
