@@ -3,9 +3,10 @@ import React from 'react';
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
+  onReturnHome?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onReturnHome }) => {
   const menuItems = [
     {
       id: 'dashboard',
@@ -167,6 +168,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => 
 
       {/* Engine Status & Footer */}
       <div style={styles.footer}>
+        {onReturnHome && (
+          <button 
+            onClick={onReturnHome}
+            style={styles.exitBtn}
+            title="Return to public marketing homepage"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: '6px' }}>
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            Exit to Landing Site
+          </button>
+        )}
         <div style={styles.statusBox}>
           <span style={styles.statusDot} />
           <div style={styles.statusText}>
@@ -320,5 +334,21 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '0.68rem',
     color: 'var(--text-dark)',
     textAlign: 'center'
+  },
+  exitBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    padding: '0.5rem',
+    background: 'rgba(239, 68, 68, 0.06)',
+    border: '1px solid rgba(239, 68, 68, 0.2)',
+    color: '#f87171',
+    borderRadius: '8px',
+    fontSize: '0.78rem',
+    fontWeight: '700',
+    cursor: 'pointer',
+    marginBottom: '0.85rem',
+    transition: 'all 0.2s ease'
   }
 };

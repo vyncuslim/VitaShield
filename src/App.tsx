@@ -10,6 +10,7 @@ import { RulesEngine } from './components/RulesEngine';
 import { AdminPortal } from './components/AdminPortal';
 import { MLEngine } from './components/MLEngine';
 import { AlertsManager } from './components/AlertsManager';
+import { MarketingPortal } from './components/MarketingPortal';
 import type { ShieldConfig, VerificationLog } from './types';
 
 // Initial dummy logs that feed the dashboard charts and tables
@@ -83,6 +84,7 @@ const INITIAL_LOGS: VerificationLog[] = [
 ];
 
 function App() {
+  const [viewMode, setViewMode] = useState<'marketing' | 'console'>('marketing');
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   
   const [config, setConfig] = useState<ShieldConfig>({
@@ -144,10 +146,21 @@ function App() {
     }
   };
 
+  if (viewMode === 'marketing') {
+    return (
+      <MarketingPortal 
+        onEnterConsole={() => {
+          setViewMode('console');
+          setActiveTab('dashboard');
+        }} 
+      />
+    );
+  }
+
   return (
     <div className="app-container">
       {/* Side Navigation panel */}
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onReturnHome={() => setViewMode('marketing')} />
       
       {/* Main viewport area */}
       <main className="main-content">
