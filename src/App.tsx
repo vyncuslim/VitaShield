@@ -179,7 +179,7 @@ function App() {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard config={config} />;
+        return <Dashboard config={config} logs={logs} />;
       case 'playground':
         return <WidgetPlayground config={config} onAddLog={handleAddLog} />;
       case 'logs':
@@ -199,7 +199,7 @@ function App() {
       case 'alerts':
         return <AlertsManager />;
       default:
-        return <Dashboard config={config} />;
+        return <Dashboard config={config} logs={logs} />;
     }
   };
 

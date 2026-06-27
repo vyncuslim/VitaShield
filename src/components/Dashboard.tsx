@@ -1,312 +1,104 @@
 import React, { useState } from 'react';
-import type { ShieldConfig } from '../types';
+import type { ShieldConfig, VerificationLog } from '../types';
 
 interface DashboardProps {
   config: ShieldConfig;
+  logs: VerificationLog[];
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ config }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ config, logs }) => {
   const [hoveredPoint, setHoveredPoint] = useState<{ day: string; human: number; bot: number; index: number } | null>(null);
 
-  // Dynamic KPI stats based on preset selector
-  const getKpis = () => {
-    switch (config.preset) {
-      case 'social':
-        return [
-          {
-            title: 'Attack Count',
-            value: '8,721',
-            change: '+15.2% fake accounts',
-            isUp: true,
-            color: 'var(--warning)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-            )
-          },
-          {
-            title: 'Bot Traffic Rate',
-            value: '4.8%',
-            change: '+0.5% duplicate signups',
-            isUp: true,
-            color: 'var(--primary)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="16" x2="12" y2="12" />
-                <line x1="12" y1="8" x2="12.01" y2="8" />
-              </svg>
-            )
-          },
-          {
-            title: 'Blocked Requests',
-            value: '3,120',
-            change: '+14.2% mass registrations',
-            isUp: true,
-            color: 'var(--danger)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-            )
-          },
-          {
-            title: 'Device Trust Pass',
-            value: '97.4%',
-            change: '+1.1% fingerprint sync',
-            isUp: true,
-            color: 'var(--success)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            )
-          }
-        ];
-      case 'ai_apps':
-        return [
-          {
-            title: 'Attack Count',
-            value: '14,212',
-            change: '+22.4% scraper bots',
-            isUp: true,
-            color: 'var(--warning)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="12 2 2 22 22 22 12 2" />
-                <line x1="12" y1="9" x2="12" y2="13" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-              </svg>
-            )
-          },
-          {
-            title: 'Bot Traffic Rate',
-            value: '12.4%',
-            change: '+4.1% prompt injection',
-            isUp: true,
-            color: 'var(--primary)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
-            )
-          },
-          {
-            title: 'Blocked Requests',
-            value: '9,230',
-            change: '+28.2% LLM hijack limit',
-            isUp: true,
-            color: 'var(--danger)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="15" y1="9" x2="9" y2="15" />
-                <line x1="9" y1="9" x2="15" y2="15" />
-              </svg>
-            )
-          },
-          {
-            title: 'PoW Solver Pass',
-            value: '91.8%',
-            change: '+0.5% hash calculation',
-            isUp: true,
-            color: 'var(--success)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="22 4 12 14.01 9 11.01" />
-              </svg>
-            )
-          }
-        ];
-      case 'crypto':
-        return [
-          {
-            title: 'Attack Count',
-            value: '2,410',
-            change: '+8.3% duplicate GPUs',
-            isUp: true,
-            color: 'var(--warning)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="12 2 2 7 12 12 22 7 12 2" />
-                <polyline points="2 17 12 22 22 17" />
-                <polyline points="2 12 12 17 22 12" />
-              </svg>
-            )
-          },
-          {
-            title: 'Bot Traffic Rate',
-            value: '3.5%',
-            change: '-0.8% Sybil scripts',
-            isUp: false,
-            color: 'var(--primary)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
-                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
-              </svg>
-            )
-          },
-          {
-            title: 'Blocked Requests',
-            value: '1,822',
-            change: '+19.4% wallet farming',
-            isUp: true,
-            color: 'var(--danger)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
-              </svg>
-            )
-          },
-          {
-            title: 'Anti-Sybil Clearance',
-            value: '96.2%',
-            change: '+1.5% WebGL hardware',
-            isUp: true,
-            color: 'var(--success)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            )
-          }
-        ];
-      case 'gaming':
-        return [
-          {
-            title: 'Attack Count',
-            value: '28,102',
-            change: '+32.1% studio macros',
-            isUp: true,
-            color: 'var(--warning)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-            )
-          },
-          {
-            title: 'Bot Traffic Rate',
-            value: '8.9%',
-            change: '+2.4% auto-clickers',
-            isUp: true,
-            color: 'var(--primary)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <circle cx="12" cy="12" r="4" />
-              </svg>
-            )
-          },
-          {
-            title: 'Blocked Requests',
-            value: '14,812',
-            change: '+15.3% client macros',
-            isUp: true,
-            color: 'var(--danger)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                <line x1="9" y1="9" x2="15" y2="15" />
-                <line x1="15" y1="9" x2="9" y2="15" />
-              </svg>
-            )
-          },
-          {
-            title: 'Kinetics Tracker Pass',
-            value: '95.1%',
-            change: '+0.4% cursor path scan',
-            isUp: true,
-            color: 'var(--success)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            )
-          }
-        ];
-      case 'general':
-      default:
-        return [
-          {
-            title: 'Attack Count',
-            value: '12,482',
-            change: '+18.1% vs last week',
-            isUp: true,
-            color: 'var(--warning)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                <line x1="12" y1="9" x2="12" y2="13" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-              </svg>
-            )
-          },
-          {
-            title: 'Bot Traffic Rate',
-            value: '5.8%',
-            change: '+1.2% activity spike',
-            isUp: true,
-            color: 'var(--primary)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-                <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-                <line x1="12" y1="22.08" x2="12" y2="12" />
-              </svg>
-            )
-          },
-          {
-            title: 'Blocked Requests',
-            value: '4,208',
-            change: '+12.4% block efficiency',
-            isUp: true,
-            color: 'var(--danger)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-            )
-          },
-          {
-            title: 'Human Pass Rate',
-            value: '94.2%',
-            change: '+0.8% accuracy gain',
-            isUp: true,
-            color: 'var(--success)',
-            icon: (
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                <polyline points="22 4 12 14.01 9 11.01" />
-              </svg>
-            )
-          }
-        ];
+  // Calculate live stats dynamically based on logs
+  const total = logs.length;
+  const blocked = logs.filter(l => l.status === 'blocked').length;
+  const passed = logs.filter(l => l.status === 'passed').length;
+  const flagged = logs.filter(l => l.status === 'flagged').length;
+
+  const botRate = total ? ((blocked / total) * 100).toFixed(1) + '%' : '0.0%';
+  const deviceTrust = total ? (((passed + flagged) / total) * 100).toFixed(1) + '%' : '100.0%';
+
+  const kpis = [
+    {
+      title: 'Total Verification Attempts',
+      value: total.toLocaleString(),
+      change: 'Real-time gateway inquiries',
+      isUp: true,
+      color: 'var(--primary)',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+        </svg>
+      )
+    },
+    {
+      title: 'Bot Traffic Rate',
+      value: botRate,
+      change: `${blocked} anomalies blocked`,
+      isUp: blocked > 0,
+      color: 'var(--warning)',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" strokeWidth="2">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12.01" y2="8" />
+        </svg>
+      )
+    },
+    {
+      title: 'Blocked Requests',
+      value: blocked.toLocaleString(),
+      change: 'Dropped connections',
+      isUp: blocked > 0,
+      color: 'var(--danger)',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--danger)" strokeWidth="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+      )
+    },
+    {
+      title: 'Average Device Integrity',
+      value: deviceTrust,
+      change: 'Passing verified hardware',
+      isUp: true,
+      color: 'var(--success)',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="2">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      )
     }
-  };
-
-  const kpis = getKpis();
-
-  // Chart data setup (Last 7 Days)
-  const chartData = [
-    { day: 'Mon', human: 12000, bot: 300 },
-    { day: 'Tue', human: 15400, bot: 950 },
-    { day: 'Wed', human: 14200, bot: 400 },
-    { day: 'Thu', human: 18100, bot: 2100 }, // attack spike
-    { day: 'Fri', human: 19500, bot: 600 },
-    { day: 'Sat', human: 11000, bot: 250 },
-    { day: 'Sun', human: 13200, bot: 320 }
   ];
 
-  const maxVal = 22000;
+  // Group logs dynamically by day of week
+  const chartData = [
+    { day: 'Mon', human: logs.filter(l => l.status !== 'blocked' && new Date(l.timestamp).getDay() === 1).length, bot: logs.filter(l => l.status === 'blocked' && new Date(l.timestamp).getDay() === 1).length },
+    { day: 'Tue', human: logs.filter(l => l.status !== 'blocked' && new Date(l.timestamp).getDay() === 2).length, bot: logs.filter(l => l.status === 'blocked' && new Date(l.timestamp).getDay() === 2).length },
+    { day: 'Wed', human: logs.filter(l => l.status !== 'blocked' && new Date(l.timestamp).getDay() === 3).length, bot: logs.filter(l => l.status === 'blocked' && new Date(l.timestamp).getDay() === 3).length },
+    { day: 'Thu', human: logs.filter(l => l.status !== 'blocked' && new Date(l.timestamp).getDay() === 4).length, bot: logs.filter(l => l.status === 'blocked' && new Date(l.timestamp).getDay() === 4).length },
+    { day: 'Fri', human: logs.filter(l => l.status !== 'blocked' && new Date(l.timestamp).getDay() === 5).length, bot: logs.filter(l => l.status === 'blocked' && new Date(l.timestamp).getDay() === 5).length },
+    { day: 'Sat', human: logs.filter(l => l.status !== 'blocked' && new Date(l.timestamp).getDay() === 6).length, bot: logs.filter(l => l.status === 'blocked' && new Date(l.timestamp).getDay() === 6).length },
+    { day: 'Sun', human: logs.filter(l => l.status !== 'blocked' && new Date(l.timestamp).getDay() === 0).length, bot: logs.filter(l => l.status === 'blocked' && new Date(l.timestamp).getDay() === 0).length }
+  ];
+
+  const maxVal = Math.max(10, ...chartData.map(d => Math.max(d.human, d.bot))) + 2;
+  const yLabels = [0, Math.round(maxVal * 0.25), Math.round(maxVal * 0.5), Math.round(maxVal * 0.75), maxVal];
+
+  // Calculate live verification method distribution for Threat Intelligence
+  const methodCounts = {
+    telemetry: logs.filter(l => l.method === 'behavioral_telemetry').length,
+    captcha: logs.filter(l => l.method === 'captcha_3d').length,
+    pow: logs.filter(l => l.method === 'cryptographic_pow').length,
+    biometrics: logs.filter(l => l.method === 'biometric_scan').length
+  };
+  const methodTotal = total || 1;
+  const pctTelemetry = ((methodCounts.telemetry / methodTotal) * 100).toFixed(1);
+  const pctCaptcha = ((methodCounts.captcha / methodTotal) * 100).toFixed(1);
+  const pctPow = ((methodCounts.pow / methodTotal) * 100).toFixed(1);
+  const pctBiometrics = ((methodCounts.biometrics / methodTotal) * 100).toFixed(1);
   const width = 600;
   const height = 220;
   const paddingLeft = 45;
@@ -458,7 +250,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ config }) => {
               })}
 
               {/* Y Axis Labels */}
-              {[0, 5000, 10000, 15000, 20000].map((val, i) => {
+              {yLabels.map((val, i) => {
                 const y = height - paddingBottom - (val / maxVal) * chartHeight;
                 return (
                   <text
@@ -470,7 +262,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ config }) => {
                     fontWeight="500"
                     textAnchor="end"
                   >
-                    {val >= 1000 ? `${val / 1000}k` : val}
+                    {val >= 1000 ? `${(val / 1000).toFixed(1)}k` : val}
                   </text>
                 );
               })}
@@ -566,45 +358,45 @@ export const Dashboard: React.FC<DashboardProps> = ({ config }) => {
             <div style={styles.metricRow}>
               <div style={styles.metricLabelInfo}>
                 <span style={styles.metricColorIndicator} />
-                <span>Datacenter Scrapers</span>
+                <span>Behavioral Telemetry</span>
               </div>
-              <span style={styles.metricValueText}>38.5%</span>
+              <span style={styles.metricValueText}>{pctTelemetry}%</span>
             </div>
             <div style={styles.progressContainer}>
-              <div style={{ ...styles.progressBar, width: '38.5%', background: 'var(--primary)' }} />
+              <div style={{ ...styles.progressBar, width: `${pctTelemetry}%`, background: 'var(--primary)' }} />
             </div>
 
             <div style={styles.metricRow}>
               <div style={styles.metricLabelInfo}>
                 <span style={{ ...styles.metricColorIndicator, background: 'var(--secondary)' }} />
-                <span>Headless Browsers (Puppeteer)</span>
+                <span>3D Capcha Challenge</span>
               </div>
-              <span style={styles.metricValueText}>29.4%</span>
+              <span style={styles.metricValueText}>{pctCaptcha}%</span>
             </div>
             <div style={styles.progressContainer}>
-              <div style={{ ...styles.progressBar, width: '29.4%', background: 'var(--secondary)' }} />
+              <div style={{ ...styles.progressBar, width: `${pctCaptcha}%`, background: 'var(--secondary)' }} />
             </div>
 
             <div style={styles.metricRow}>
               <div style={styles.metricLabelInfo}>
                 <span style={{ ...styles.metricColorIndicator, background: 'var(--warning)' }} />
-                <span>AI Agent Solvers</span>
+                <span>Proof-of-Work Puzzles</span>
               </div>
-              <span style={styles.metricValueText}>21.2%</span>
+              <span style={styles.metricValueText}>{pctPow}%</span>
             </div>
             <div style={styles.progressContainer}>
-              <div style={{ ...styles.progressBar, width: '21.2%', background: 'var(--warning)' }} />
+              <div style={{ ...styles.progressBar, width: `${pctPow}%`, background: 'var(--warning)' }} />
             </div>
 
             <div style={styles.metricRow}>
               <div style={styles.metricLabelInfo}>
                 <span style={{ ...styles.metricColorIndicator, background: 'var(--danger)' }} />
-                <span>Residential Proxy Spoofing</span>
+                <span>Kinetics Biometric Scan</span>
               </div>
-              <span style={styles.metricValueText}>10.9%</span>
+              <span style={styles.metricValueText}>{pctBiometrics}%</span>
             </div>
             <div style={styles.progressContainer}>
-              <div style={{ ...styles.progressBar, width: '10.9%', background: 'var(--danger)' }} />
+              <div style={{ ...styles.progressBar, width: `${pctBiometrics}%`, background: 'var(--danger)' }} />
             </div>
           </div>
 
