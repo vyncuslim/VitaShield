@@ -58,7 +58,7 @@ app.post('/login', async (req, res) => {
   const clientIp = req.ip;
 
   // Validate the token with VitaShield API
-  const response = await fetch('https://vitashield.sleepsomno.com/v1/verify', {
+  const response = await fetch('https://api.vitashield.sleepsomno.com/v1/verify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -84,7 +84,7 @@ app.listen(3000);`,
     python: `import requests
 
 def verify_shield_token(token, client_ip):
-    url = "https://vitashield.sleepsomno.com/v1/verify"
+    url = "https://api.vitashield.sleepsomno.com/v1/verify"
     payload = {
         "secret": "${keys.secretKey}",
         "token": token,
@@ -133,7 +133,7 @@ func verifyToken(token, ip string) (bool, error) {
     })
 
     client := &http.Client{Timeout: 5 * time.Second}
-    resp, err := client.Post("https://vitashield.sleepsomno.com/v1/verify", "application/json", bytes.NewBuffer(reqBody))
+    resp, err := client.Post("https://api.vitashield.sleepsomno.com/v1/verify", "application/json", bytes.NewBuffer(reqBody))
     if err != nil {
         return false, err
     }
@@ -158,7 +158,7 @@ public class ShieldVerifier {
         
         HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
         HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create("https://vitashield.sleepsomno.com/v1/verify"))
+            .uri(URI.create("https://api.vitashield.sleepsomno.com/v1/verify"))
             .header("Content-Type", "application/json")
             .POST(HttpRequest.BodyPublishers.ofString(json))
             .build();
@@ -170,7 +170,7 @@ public class ShieldVerifier {
 
     php: `<?php
 function verifyShieldToken($token, $ip) {
-    $url = 'https://vitashield.sleepsomno.com/v1/verify';
+    $url = 'https://api.vitashield.sleepsomno.com/v1/verify';
     $data = [
         'secret' => '${keys.secretKey}',
         'token'  => $token,
@@ -195,7 +195,7 @@ function verifyShieldToken($token, $ip) {
 }
 ?>`,
 
-    curl: `curl -X POST https://vitashield.sleepsomno.com/v1/verify \\
+    curl: `curl -X POST https://api.vitashield.sleepsomno.com/v1/verify \\
   -H "Content-Type: application/json" \\
   -d '{
     "secret": "${keys.secretKey}",
@@ -344,7 +344,7 @@ function verifyShieldToken($token, $ip) {
               <span>Download ready-to-test **Postman Collection v2.1 JSON** containing verify endpoints.</span>
             </div>
             <button 
-              onClick={() => handleCopy('https://vitashield.sleepsomno.com/v1/postman_collection.json', 'postman')} 
+              onClick={() => handleCopy('https://api.vitashield.sleepsomno.com/v1/postman_collection.json', 'postman')} 
               style={styles.postmanBtn}
             >
               {copiedKey === 'postman' ? 'Link Copied!' : 'Copy Postman Link'}
