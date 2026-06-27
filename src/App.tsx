@@ -11,6 +11,7 @@ import { AdminPortal } from './components/AdminPortal';
 import { MLEngine } from './components/MLEngine';
 import { AlertsManager } from './components/AlertsManager';
 import { MarketingPortal } from './components/MarketingPortal';
+import { AuthPortal } from './components/AuthPortal';
 import type { ShieldConfig, VerificationLog } from './types';
 
 // Initial dummy logs that feed the dashboard charts and tables
@@ -84,8 +85,16 @@ const INITIAL_LOGS: VerificationLog[] = [
 ];
 
 function App() {
-  const [viewMode, setViewMode] = useState<'marketing' | 'console'>('marketing');
+  const [viewMode, setViewMode] = useState<'marketing' | 'auth' | 'console'>('marketing');
   const [activeTab, setActiveTab] = useState<string>('dashboard');
+  const [user, setUser] = useState<any>(() => {
+    try {
+      const cached = localStorage.getItem('vms-auth-session');
+      return cached ? JSON.parse(cached) : null;
+    } catch {
+      return null;
+    }
+  });
   
   const [config, setConfig] = useState<ShieldConfig>({
     preset: 'general',
@@ -150,9 +159,27 @@ function App() {
     return (
       <MarketingPortal 
         onEnterConsole={() => {
+          if (user) {
+            setViewMode('console');
+            setActiveTab('dashboard');
+          } else {
+            setViewMode('auth');
+          }
+        }} 
+      />
+    );
+  }
+
+  if (viewMode === 'auth') {
+    return (
+      <AuthPortal 
+        onAuthSuccess={(session) => {
+          localStorage.setItem('vms-auth-session', JSON.stringify(session));
+          setUser(session);
           setViewMode('console');
           setActiveTab('dashboard');
-        }} 
+        }}
+        onBackToHome={() => setViewMode('marketing')}
       />
     );
   }
@@ -160,7 +187,16 @@ function App() {
   return (
     <div className="app-container">
       {/* Side Navigation panel */}
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} onReturnHome={() => setViewMode('marketing')} />
+      <Sidebar 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        onReturnHome={() => setViewMode('marketing')}
+        onLogout={() => {
+          localStorage.removeItem('vms-auth-session');
+          setUser(null);
+          setViewMode('marketing');
+        }}
+      />
       
       {/* Main viewport area */}
       <main className="main-content">

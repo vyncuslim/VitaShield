@@ -4,9 +4,10 @@ interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   onReturnHome?: () => void;
+  onLogout?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onReturnHome }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onReturnHome, onLogout }) => {
   const menuItems = [
     {
       id: 'dashboard',
@@ -168,6 +169,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onRet
 
       {/* Engine Status & Footer */}
       <div style={styles.footer}>
+        {onLogout && (
+          <button 
+            onClick={onLogout}
+            style={{ ...styles.exitBtn, background: 'rgba(239, 68, 68, 0.08)', color: '#f87171', borderColor: 'rgba(239, 68, 68, 0.2)', marginBottom: '0.45rem' }}
+            title="Sign out of developer console"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: '6px' }}>
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+              <polyline points="16 17 21 12 16 7" />
+              <line x1="21" y1="12" x2="9" y2="12" />
+            </svg>
+            Sign Out
+          </button>
+        )}
         {onReturnHome && (
           <button 
             onClick={onReturnHome}
