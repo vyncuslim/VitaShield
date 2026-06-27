@@ -1,0 +1,71 @@
+{
+  "info": {
+    "_postman_id": "8c4fd2a7-5c21-4f9e-be89-6fa9b8b981f2",
+    "name": "VitaShield API Specifications",
+    "description": "Enterprise API collection for integrating and testing the VitaShield AI-Native Human Verification Platform.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Verify Telemetry Token",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"secret\": \"vms_sec_live_your_private_secret_key\",\n  \"token\": \"vmt_live_token_base64_telemetry_here\",\n  \"ip\": \"203.0.113.195\"\n}"
+        },
+        "url": {
+          "raw": "https://api.vitashield.sleepsomno.com/v1/verify",
+          "protocol": "https",
+          "host": [
+            "api",
+            "vitashield",
+            "sleepsomno",
+            "com"
+          ],
+          "path": [
+            "v1",
+            "verify"
+          ]
+        },
+        "description": "Verifies the client-side telemetry token returned by the VitaShield SDK widget. Returns risk score evaluation analysis and gateway access decisions (Allow, Challenge, or Block)."
+      },
+      "response": [
+        {
+          "name": "Verification Success (Human)",
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"human_score\": 90,\n  \"risk_level\": \"low\",\n  \"decision\": \"allow\",\n  \"trust_and_reputation\": {\n    \"trust_score\": 85,\n    \"reputation\": \"excellent\",\n    \"device_integrity\": \"verified_device\"\n  },\n  \"ai_agent_detection\": {\n    \"is_ai_agent\": false,\n    \"agent_type\": \"none\",\n    \"automation_likelihood\": 0.1\n  }\n}"
+        },
+        {
+          "name": "Verification Flagged (Challenge)",
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"human_score\": 45,\n  \"risk_level\": \"medium\",\n  \"decision\": \"challenge\",\n  \"trust_and_reputation\": {\n    \"trust_score\": 50,\n    \"reputation\": \"suspicious\",\n    \"device_integrity\": \"verified_device\"\n  },\n  \"ai_agent_detection\": {\n    \"is_ai_agent\": false,\n    \"agent_type\": \"none\",\n    \"automation_likelihood\": 0.55\n  }\n}"
+        }
+      ]
+    }
+  ]
+}
