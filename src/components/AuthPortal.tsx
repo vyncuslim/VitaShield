@@ -129,6 +129,51 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthSuccess, onBackToH
           {isSignUp ? 'Create your enterprise developer account.' : 'Sign in to access your threat security dashboard.'}
         </p>
 
+        {!isSignUp && (
+          <div style={styles.ssoPromptBox}>
+            <div style={styles.ssoPromptText}>
+              <span style={styles.ssoDot} />
+              <span>已在 <strong>sleepsomno.com</strong> 登入？</span>
+            </div>
+            <button 
+              type="button"
+              onClick={() => {
+                const getCookie = (name: string) => {
+                  const value = `; ${document.cookie}`;
+                  const parts = value.split(`; ${name}=`);
+                  if (parts.length === 2) return parts.pop()?.split(';').shift();
+                  return undefined;
+                };
+
+                const sharedJwt = getCookie('sleepsomno_jwt') || getCookie('sb-access-token');
+                if (sharedJwt) {
+                  const session = {
+                    accessToken: sharedJwt,
+                    user: { email: 'member@sleepsomno.com' },
+                    sso: true,
+                    source: 'sleepsomno.com cookie'
+                  };
+                  localStorage.setItem('vms-auth-session', JSON.stringify(session));
+                  onAuthSuccess(session);
+                } else {
+                  setErrorMsg('未檢測到 sleepsomno.com 登入狀態，即將導向主站獲取授權...');
+                  setTimeout(() => {
+                    window.location.href = 'https://sleepsomno.com/login?redirect_to=https://vitashield.sleepsomno.com';
+                  }, 2000);
+                }
+              }}
+              style={styles.ssoBtn}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: '6px' }}>
+                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                <polyline points="10 17 15 12 10 7" />
+                <line x1="15" y1="12" x2="3" y2="12" />
+              </svg>
+              一鍵導入 sleepsomno.com 帳號
+            </button>
+          </div>
+        )}
+
         {errorMsg && <div style={styles.alertError}>{errorMsg}</div>}
         {successMsg && <div style={styles.alertSuccess}>{successMsg}</div>}
 
@@ -369,5 +414,46 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: '700',
     cursor: 'pointer',
     padding: 0
+  },
+  ssoPromptBox: {
+    padding: '0.85rem',
+    background: 'rgba(6, 182, 212, 0.04)',
+    border: '1px solid rgba(6, 182, 212, 0.15)',
+    borderRadius: '8px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.65rem',
+    alignItems: 'center',
+    textAlign: 'center'
+  },
+  ssoPromptText: {
+    fontSize: '0.78rem',
+    color: 'var(--text-muted)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px'
+  },
+  ssoDot: {
+    width: '6px',
+    height: '6px',
+    borderRadius: '50%',
+    background: 'var(--secondary)',
+    boxShadow: '0 0 6px var(--secondary)',
+    display: 'inline-block'
+  },
+  ssoBtn: {
+    width: '100%',
+    padding: '0.45rem',
+    background: 'rgba(6, 182, 212, 0.08)',
+    border: '1px solid rgba(6, 182, 212, 0.25)',
+    color: 'var(--secondary)',
+    borderRadius: '6px',
+    fontSize: '0.78rem',
+    fontWeight: '700',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s ease'
   }
 };
