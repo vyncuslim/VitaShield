@@ -273,7 +273,7 @@ export const WidgetPlayground: React.FC<WidgetPlaygroundProps> = ({ config, onAd
               <>
                 <div className="input-group">
                   <label className="input-label">User Account Email</label>
-                  <input required type="email" placeholder="admin@vitamind.ai" value={email} onChange={e=>setEmail(e.target.value)} className="input-field" />
+                  <input required type="email" placeholder="admin@sleepsomno.com" value={email} onChange={e=>setEmail(e.target.value)} className="input-field" />
                 </div>
                 <div className="input-group">
                   <label className="input-label">Secure Passcode</label>

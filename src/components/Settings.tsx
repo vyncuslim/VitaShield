@@ -245,7 +245,7 @@ export const Settings: React.FC<SettingsProps> = ({ config, setConfig }) => {
             <div style={styles.statusBox}>
               <div style={styles.statusRow}>
                 <span style={styles.statusLabel}>Current Gateway</span>
-                <span style={styles.statusVal}>gateway.vitamind.ai</span>
+                <span style={styles.statusVal}>vitashield.sleepsomno.com</span>
               </div>
               <div style={styles.statusRow}>
                 <span style={styles.statusLabel}>TLS Requirement</span>

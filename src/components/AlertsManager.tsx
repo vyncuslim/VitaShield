@@ -39,7 +39,7 @@ export const AlertsManager: React.FC = () => {
 
   const [slackUrl, setSlackUrl] = useState('https://hooks.slack.com/services/YOUR_WORKSPACE_ID/YOUR_CHANNEL_ID/YOUR_WEBHOOK_TOKEN');
   const [discordUrl, setDiscordUrl] = useState('');
-  const [emailAddress, setEmailAddress] = useState('security-ops@vitamind.ai');
+  const [emailAddress, setEmailAddress] = useState('security-ops@sleepsomno.com');
   const [webhookUrl, setWebhookUrl] = useState('');
 
   const [spikePercent, setSpikePercent] = useState(15);
