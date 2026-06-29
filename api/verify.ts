@@ -33,6 +33,38 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ success: false, error: 'Missing verification token.' });
     }
 
+    // Handle No-JS graceful fallback verification request
+    if (token === 'no-js-fallback') {
+      return res.status(200).json({
+        success: true,
+        decision: 'block',
+        scores: {
+          risk_score: 95,
+          trust_score: 5,
+          reputation_score: 50
+        },
+        detection_details: {
+          is_ai_agent: true,
+          agent_type: 'no_js_crawler',
+          device_anomalies: ['javascript_disabled_client'],
+          behavior_flags: ['no_client_telemetry_payload'],
+          network_flags: []
+        },
+        human_score: 5,
+        risk_level: 'high',
+        trust_and_reputation: {
+          trust_score: 5,
+          reputation: 'suspicious',
+          device_integrity: 'compromised'
+        },
+        ai_agent_detection: {
+          is_ai_agent: true,
+          agent_type: 'no_js_crawler',
+          automation_likelihood: 0.95
+        }
+      });
+    }
+
     // 1. Decode token payload (Base64 encrypted by client-side widget.js)
     let telemetry: any = {};
     try {

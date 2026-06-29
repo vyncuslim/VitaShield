@@ -38,6 +38,25 @@ For traditional multipage static HTML forms, inject the CDN script and place the
 
 ---
 
+### Graceful Fallback for JavaScript-Disabled Clients (无 JS 降级模式)
+If a client disables JavaScript (a behavior typical of headless scrapers to bypass client tracking scripts), the frontend SDK will not initialize. To prevent your form submission from breaking while ensuring security, place a `<noscript>` tag directly inside your `<form>`:
+
+```html
+<noscript>
+  <div style="padding: 12px; background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; border-radius: 8px; color: #f87171; font-family: sans-serif; font-size: 12px; margin: 12px 0;">
+    ⚠️ JavaScript is disabled. For security validation, please submit the form to proceed to fallback security gates.
+    <input type="hidden" name="vms-no-js-fallback" value="true" />
+  </div>
+</noscript>
+```
+
+#### Backend Fallback Verification:
+When your server intercepts the form data:
+1. If the request contains `vms-no-js-fallback = "true"`, treat this session as high-risk (`risk_score = 95`).
+2. Redirect the client to a static 3D Captcha confirmation page, or enforce a strict Rate-Limit policy to prevent scraper flooding.
+
+---
+
 ### Option B: React / Next.js Component
 For modern single-page apps, import our modular React component and track validation status inside your state loop.
 
