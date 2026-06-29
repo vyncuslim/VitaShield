@@ -8,23 +8,23 @@
 
 **VitaShield** 是由 **VitaMind AI** 團隊研發的企業級、AI 原生人機驗證與反自動化爬蟲防禦系統。旨在為 B2B SaaS、Web3 應用以及 API 網關提供高效、零干擾、隱私友好的防禦方案，有效遏制憑證撞庫、接口惡意刷單、數據爬取以及高級 AI 代理 (AI Operators) 的濫用。
 
-### 🌟 核心設計理念與差異化優勢
+### 🌟 當前版本已實現功能 (Currently Implemented)
 
-*   **無感行為遙測 (Invisible Telemetry)**：預設情況下完全不打擾正常人類。在後台靜默分析設備特徵與操作速度，無需用戶進行任何點選或圖片對齊，實現 95% 以上人類零等待通過。
-*   **漸進式挑戰驗證 (Progressive Challenges)**：只有當後端評估到異常（如直線軌跡、常數速度打字、提交速度小於 450ms）時，才會在前端動態升級為滑塊 (Slider) 或 Proof-of-Work (PoW) 算力碰撞挑戰。
-*   **AI 代理特定識別 (AI Agent Detection)**：專門針對 Puppeteer, Playwright, Selenium 以及 OpenAI Operator 等高級自動化 AI 代理進行行為與特徵交叉指紋校驗，精準識別機器人。
-*   **開發者優先 (Developer DX)**：極簡對接。前端一行程式碼嵌入，後端一個 API 即可完成校驗，內建多租戶帳號隔離與對 sleepsomno.com 的統一 SSO 登入支持。
+*   **行為生物遙測探針**：前端 SDK 靜默採集滑鼠移動坐標、打字延遲規律、退格修正動作、剪貼簿粘貼頻率，以及 WebGL GPU 驅動特徵等指紋特徵。
+*   **多維風險引擎 (Risk Engine v2)**：後台模組化評分算法（包含軌跡直線度檢測、速度方差檢測、打字均勻度分析、提交停留時長檢測），輸出 0-100 的 Risk/Trust 分數。
+*   **漸進式無感挑戰**：對正常人類實現 95% 以上零干擾隱身通過；僅在識別到可疑行為（如無滑鼠移動、常數打字間隔等）時，自動升級為前端滑塊 Captcha 挑戰。
+*   **複製貼上後行為鏈檢測**：特徵化識別撞庫機器人「填充文字後瞬間（<350ms）提交且無滑鼠軌跡」的特徵，精準阻斷。
+*   **操作猶豫期（Deceleration Pause）分析**：分析最後一次滑鼠移動與按鈕點擊間的生理減速停頓，攔截機器人無減速的模擬點擊。
+*   **自定義 widget 主題配置**：支持通過 `data-theme-primary`、`data-theme-bg`、`data-theme-text` 屬性動態同步網頁配色；後台提供可視化色彩配置面板與代碼生成器。
+*   **實時人機體驗沙盒 (Live Sandbox)**：Landing Page 提供實時對接沙盒，可直觀查看自身操作的直線度比率、按鍵標準差，以及觸發的行為 flag。
+*   **自動化機器人模擬測試腳本 (`scripts/test-bot.js`)**：提供一鍵化測試指令，自動模擬真人曲線 vs WebDriver 機械動作與無頭 VM 爬蟲，以驗證引擎精度。
 
----
+### 🗺️ 規劃中與未來路線圖 (Future Roadmap)
 
-### ⚙️ 核心數學與安全檢測演算法 (Risk Engine v2)
-
-VitaShield 的後端評分引擎 (`/api/verify.ts`) 使用三維度（Risk、Trust、Reputation）算法進行綜合打分：
-
-1.  **滑鼠直線軌跡分析 (Linearity Checks)**：計算實際滑鼠軌跡長度與兩點間直線距離的比值。比值低於 `1.025` 則判定為完美的機械直線軌跡，標記為 `perfectly_straight_mouse_trajectory`。
-2.  **加速度變異數分析 (Velocity Variance Checks)**：正常人類操作滑鼠有加速和減速的生理規律，而 Bot 腳本多為勻速前進。如果速度方差 `< 0.015` 且有速度，標記為 `zero_mouse_acceleration_variance`。
-3.  **打字節奏方差分析 (Keystroke Cadence Variance)**：收集相鄰按鍵時間差，如果標準差 `< 8ms`，標記為 `perfectly_uniform_keystroke_cadence`（判定為腳本定時模擬打字）。
-4.  **超速提交限流 (Speed Limit)**：頁面載入到表單提交時間小於 `450ms` 時，標記為 `sub_500ms_form_submission_speed` 並強制阻斷。
+*   **動態 PoW 難度自動調校**：在高頻流量攻擊下，自動調整 Proof-of-Work 客戶端算力難度，增加機器人攻擊成本。
+*   **WebAuthn 硬件安全密鑰集成**：對高風險操作引入 YubiKey/TouchID 等物理硬件級驗證。
+*   **實時在線機器人學習與聚類分類 (Online Autoencoder)**：動態更新人機分類模型，自動學習新型自動化框架行為。
+*   **反向檢測 API 陷阱與誘餌 (Honeypot Traps)**：在 DOM 中注入視覺隱形的蜜罐字段與誘餌 API，引誘爬蟲主動暴露特徵。
 
 ---
 
@@ -43,7 +43,9 @@ VitaShield 的後端評分引擎 (`/api/verify.ts`) 使用三維度（Risk、Tru
   <input type="password" name="password" required />
   
   <!-- VitaShield 隱形防禦 Widget -->
-  <div id="vitashield-widget" data-sitekey="vms_pub_live_79a2b8e3df9102ca"></div>
+  <div id="vitashield-widget" 
+       data-sitekey="vms_pub_live_79a2b8e3df9102ca"
+       data-theme-primary="#00f2fe"></div>
   
   <button type="submit">Sign In</button>
 </form>
@@ -88,12 +90,23 @@ VitaShield 的後端評分引擎 (`/api/verify.ts`) 使用三維度（Risk、Tru
 
 **VitaShield** is an enterprise-grade, AI-native human verification and anti-bot defense infrastructure developed by **VitaMind AI**. Engineered for B2B SaaS, Web3 apps, and API gateways, VitaShield blocks automated script attacks, scraping networks, credential stuffing, and advanced AI Operators with invisible client telemetry.
 
-### 🌟 Core Differentiation
+### 🌟 Currently Implemented Features
 
-*   **Invisible Telemetry**: Completely unobtrusive. Analyzes kinetic gestures and hardware signatures silently in the background. Over 95% of real humans pass instantly without clicking anything.
-*   **Progressive Challenge Loops**: Triggers interactive slider puzzles or client-side cryptographic Proof-of-Work (PoW) computation ONLY when suspicious bot-like behavior is mathematically flagged.
-*   **AI Agent & Automation Profiling**: Advanced browser-runtime checking to detect Puppeteer, Playwright, Selenium, and OpenAI Operator agents.
-*   **SSO Ready**: Built-in support for single sign-on (SSO) and shared root-domain sessions mapped to the `sleepsomno.com` ecosystem.
+*   **Invisible Telemetry Sensors**: Captures mouse curves, sub-pixel coordinate floats, keypress delays, text revision (backspaces), copy-paste timing offsets, and WebGL virtualized GPU profiles.
+*   **Modular Risk Engine (Risk Engine v2)**: Evaluates kinetic gestures on the server side using `SignalAnalyzer` and `ScoreCalculator`, generating real-time Risk and Trust scores.
+*   **Progressive Challenge Loops**: Triggers visual slider captures ONLY when suspicious bot kinetics are flagged. Seamless pass-through for 95%+ of human users.
+*   **Credential Stuffing Paste-Submit Protection**: Detects automated stuffing scripts by checking if form submission occurs within 350ms of a copy-paste event with zero cursor motion.
+*   **Hesitation Pause Evaluator**: Flags machine-speed click executions (less than 25ms delay after moving) that bypass biological muscle deceleration curves.
+*   **Dynamic Theme Builder**: Exposes color-picking settings that output custom themes (`data-theme-primary`, `data-theme-bg`, `data-theme-text`) read directly by frontend widget runtimes.
+*   **Live Landing Sandbox Console**: Includes an interactive demo form on the public landing page to inspect and output your own real-time gesture straightness, typing deviations, and scoring flags.
+*   **Local Bot Simulator Script (`scripts/test-bot.js`)**: Executable simulation test suite evaluating human vs automated webdriver bot vs headless VM crawler profiles.
+
+### 🗺️ Future Roadmap / In Progress
+
+*   **Proof-of-Work Puzzle Scaling**: Automatic scaling of client-side PoW math challenges under high Edge CDN traffic volume.
+*   **Hardware Token Validation**: WebAuthn biometric security and physical security key (YubiKey) gateway validations for high-threat operations.
+*   **Real-time Online Machine Learning (Online Autoencoder)**: Dynamically cluster client telemetry packets on edge servers to detect novel browser automation packages.
+*   **Active Honeypot Traps**: Invisible form parameters and decoy API targets to trick automated crawlers into identifying themselves.
 
 ---
 
@@ -108,7 +121,9 @@ Include the defense script in your HTML and place the verification target div in
 
 <!-- Place verification placeholder inside form -->
 <form id="signup-form" action="/register" method="POST">
-  <div id="vitashield-widget" data-sitekey="vms_pub_live_79a2b8e3df9102ca"></div>
+  <div id="vitashield-widget" 
+       data-sitekey="vms_pub_live_79a2b8e3df9102ca"
+       data-theme-primary="#00f2fe"></div>
   <button type="submit">Submit</button>
 </form>
 ```
