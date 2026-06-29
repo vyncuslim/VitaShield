@@ -205,6 +205,30 @@ export class ScoreCalculator {
       behaviorFlags.push('no_page_scroll_activity');
     }
 
+    // 4. VitaShield Original Heuristics
+    const lastPasteTime = behavior.lastPasteTime || 0;
+    const submitPauseMs = behavior.submitPauseMs || 0;
+    const backspaceCount = behavior.backspaceCount || 0;
+
+    // A. Post-Copy-Paste Behavior Abuse (Credential Stuffing Bot signature)
+    if (lastPasteTime > 0 && lastPasteTime < 350 && mouseEvents < 6) {
+      riskScore += 35;
+      trustScore -= 30;
+      behaviorFlags.push('bot_paste_submit_abuse');
+    }
+
+    // B. Deceleration click hesitation pattern check
+    if (submitPauseMs > 0 && submitPauseMs < 25) {
+      riskScore += 20;
+      trustScore -= 15;
+      behaviorFlags.push('instant_click_no_deceleration_pause');
+    }
+
+    // C. Error correction bonus
+    if (backspaceCount > 0) {
+      trustScore += 8;
+    }
+
     return {
       riskScore: Math.min(Math.max(riskScore, 0), 100),
       trustScore: Math.min(Math.max(trustScore, 0), 100),

@@ -20,6 +20,9 @@ export interface TelemetryBehavior {
   challengeSolved: boolean;
   challengeMethod: string;
   durationMs: number;
+  backspaceCount?: number;
+  lastPasteTime?: number;
+  submitPauseMs?: number;
 }
 
 export interface TelemetryPayload {

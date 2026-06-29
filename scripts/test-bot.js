@@ -121,6 +121,27 @@ function runLocalVerify(token, clientIp, userAgent) {
     flags.push('sub_500ms_form_submission_speed');
   }
 
+  // 4. VitaShield Original Heuristics
+  const lastPasteTime = behavior.lastPasteTime || 0;
+  const submitPauseMs = behavior.submitPauseMs || 0;
+  const backspaceCount = behavior.backspaceCount || 0;
+
+  if (lastPasteTime > 0 && lastPasteTime < 350 && (behavior.mouseEventsCount || 0) < 6) {
+    riskScore += 35;
+    trustScore -= 30;
+    flags.push('bot_paste_submit_abuse');
+  }
+
+  if (submitPauseMs > 0 && submitPauseMs < 25) {
+    riskScore += 20;
+    trustScore -= 15;
+    flags.push('instant_click_no_deceleration_pause');
+  }
+
+  if (backspaceCount > 0) {
+    trustScore += 8;
+  }
+
   riskScore = Math.min(Math.max(riskScore, 0), 100);
   trustScore = Math.min(Math.max(trustScore, 0), 100);
 
@@ -176,7 +197,10 @@ const humanPayload = encodePayload({
     scrollsCount: 3,
     mousePoints: humanMousePoints,
     keyTimings: humanKeyTimings,
-    durationMs: 3800 // Human spent 3.8s filling the form
+    durationMs: 3800, // Human spent 3.8s filling the form
+    backspaceCount: 2,
+    lastPasteTime: 0,
+    submitPauseMs: 450 // Real human paused 450ms before submit click
   }
 });
 
@@ -213,12 +237,15 @@ const botPayload = encodePayload({
     webglRenderer: 'ANGLE (NVIDIA GeForce RTX 4070 Laptop GPU)'
   },
   behavior: {
-    mouseEventsCount: 15,
+    mouseEventsCount: 3,
     keyPressesCount: 6,
     scrollsCount: 0,
     mousePoints: botMousePoints,
     keyTimings: botKeyTimings,
-    durationMs: 380 // Fast automated submit
+    durationMs: 380, // Fast automated submit
+    backspaceCount: 0,
+    lastPasteTime: 120, // Bot simulated paste-to-submit in 120ms
+    submitPauseMs: 4 // Immediate click (4ms) after move
   }
 });
 

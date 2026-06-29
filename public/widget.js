@@ -51,10 +51,10 @@
 
     renderDefaultBadge();
 
-    // 2. Behavioral Kinetics Capture Variables (Risk Engine v2)
     let mousePoints = [];
     let keyTimings = [];
     let lastKeyTime = 0;
+    let lastMouseMoveTime = 0;
 
     const getWebGLRenderer = () => {
       try {
@@ -90,25 +90,36 @@
         keyTimings: [],
         challengeSolved: false,
         challengeMethod: 'none',
-        durationMs: 0
+        durationMs: 0,
+        backspaceCount: 0,
+        lastPasteTime: 0,
+        submitPauseMs: 0
       }
     };
 
     // 3. Track events silently
     window.addEventListener('mousemove', (e) => {
+      lastMouseMoveTime = Date.now();
       telemetry.behavior.mouseEventsCount++;
       if (mousePoints.length < 30) {
-        mousePoints.push({ x: e.clientX, y: e.clientY, t: Date.now() });
+        mousePoints.push({ x: e.clientX, y: e.clientY, t: lastMouseMoveTime });
       }
     }, { passive: true });
 
-    window.addEventListener('keydown', () => {
+    window.addEventListener('keydown', (e) => {
       telemetry.behavior.keyPressesCount++;
+      if (e.key === 'Backspace' || e.key === 'Delete') {
+        telemetry.behavior.backspaceCount++;
+      }
       const now = Date.now();
       if (lastKeyTime > 0 && keyTimings.length < 15) {
         keyTimings.push(now - lastKeyTime);
       }
       lastKeyTime = now;
+    }, { passive: true });
+
+    window.addEventListener('paste', () => {
+      telemetry.behavior.lastPasteTime = Date.now();
     }, { passive: true });
 
     window.addEventListener('scroll', () => {
@@ -249,7 +260,14 @@
           return false;
         }
 
-        telemetry.behavior.durationMs = Date.now() - startTime;
+        const now = Date.now();
+        telemetry.behavior.durationMs = now - startTime;
+        if (lastMouseMoveTime > 0) {
+          telemetry.behavior.submitPauseMs = now - lastMouseMoveTime;
+        }
+        if (telemetry.behavior.lastPasteTime > 0) {
+          telemetry.behavior.lastPasteTime = now - telemetry.behavior.lastPasteTime;
+        }
 
         const jsonString = JSON.stringify(telemetry);
         const b64Token = btoa(unescape(encodeURIComponent(jsonString)));

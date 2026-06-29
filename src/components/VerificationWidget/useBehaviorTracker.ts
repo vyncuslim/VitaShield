@@ -11,22 +11,33 @@ export const useBehaviorTracker = () => {
   const lastKeyTime = useRef<number>(0);
   const challengeSolved = useRef<boolean>(false);
   const challengeMethod = useRef<string>('none');
+  const backspaceCount = useRef<number>(0);
+  const lastPasteTime = useRef<number>(0);
+  const lastMouseMoveTime = useRef<number>(0);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
+      lastMouseMoveTime.current = Date.now();
       mouseEventsCount.current++;
       if (mousePoints.current.length < 30) {
-        mousePoints.current.push({ x: e.clientX, y: e.clientY, t: Date.now() });
+        mousePoints.current.push({ x: e.clientX, y: e.clientY, t: lastMouseMoveTime.current });
       }
     };
 
-    const handleKeyDown = () => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       keyPressesCount.current++;
+      if (e.key === 'Backspace' || e.key === 'Delete') {
+        backspaceCount.current++;
+      }
       const now = Date.now();
       if (lastKeyTime.current > 0 && keyTimings.current.length < 15) {
         keyTimings.current.push(now - lastKeyTime.current);
       }
       lastKeyTime.current = now;
+    };
+
+    const handlePaste = () => {
+      lastPasteTime.current = Date.now();
     };
 
     const handleScroll = () => {
@@ -35,11 +46,13 @@ export const useBehaviorTracker = () => {
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     window.addEventListener('keydown', handleKeyDown, { passive: true });
+    window.addEventListener('paste', handlePaste, { passive: true });
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('paste', handlePaste);
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
@@ -80,7 +93,10 @@ export const useBehaviorTracker = () => {
         keyTimings: keyTimings.current,
         challengeSolved: challengeSolved.current,
         challengeMethod: challengeMethod.current,
-        durationMs: Date.now() - startTime.current
+        durationMs: Date.now() - startTime.current,
+        backspaceCount: backspaceCount.current,
+        lastPasteTime: lastPasteTime.current > 0 ? (Date.now() - lastPasteTime.current) : 0,
+        submitPauseMs: lastMouseMoveTime.current > 0 ? (Date.now() - lastMouseMoveTime.current) : 0
       }
     };
 
