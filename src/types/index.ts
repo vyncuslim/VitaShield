@@ -8,6 +8,8 @@ export interface VerificationLog {
   method: 'behavioral_telemetry' | 'captcha_3d' | 'biometric_scan' | 'cryptographic_pow';
   status: 'passed' | 'flagged' | 'blocked';
   riskScore: number; // 0 to 100
+  flags?: string[];
+  deviceAnomalies?: string[];
 }
 
 export interface ShieldConfig {

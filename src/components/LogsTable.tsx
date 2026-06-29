@@ -253,30 +253,35 @@ export const LogsTable: React.FC<LogsTableProps> = ({ logs }) => {
               <div style={styles.drawerSection}>
                 <h4 style={styles.sectionTitle}>Engine Signal Telemetry</h4>
                 <div style={styles.signalsList}>
-                  <div style={styles.signalRow}>
-                    <span>WebGL Hardware Fingerprint Check</span>
-                    <span style={{ color: inspectingLog.riskScore > 90 ? 'var(--danger)' : 'var(--success)', fontWeight: '600' }}>
-                      {inspectingLog.riskScore > 90 ? 'FLAGGED' : 'PASSED'}
-                    </span>
-                  </div>
-                  <div style={styles.signalRow}>
-                    <span>Mouse Movement Kinematics (Jitter)</span>
-                    <span style={{ color: inspectingLog.riskScore > 70 ? 'var(--danger)' : 'var(--success)', fontWeight: '600' }}>
-                      {inspectingLog.riskScore > 70 ? 'SUSPICIOUS' : 'CLEAN'}
-                    </span>
-                  </div>
-                  <div style={styles.signalRow}>
-                    <span>Automation Tool Detection (driver keys)</span>
-                    <span style={{ color: inspectingLog.riskScore > 80 ? 'var(--danger)' : 'var(--success)', fontWeight: '600' }}>
-                      {inspectingLog.riskScore > 80 ? 'FOUND' : 'NOT FOUND'}
-                    </span>
-                  </div>
-                  <div style={styles.signalRow}>
-                    <span>Cryptographic Puzzle Solving Latency</span>
-                    <span style={{ color: 'var(--success)', fontWeight: '600' }}>
-                      {inspectingLog.riskScore > 80 ? 'N/A' : '345ms'}
-                    </span>
-                  </div>
+                  {/* Device Anomalies */}
+                  {inspectingLog.deviceAnomalies && inspectingLog.deviceAnomalies.length > 0 ? (
+                    inspectingLog.deviceAnomalies.map((anomaly: string) => (
+                      <div key={anomaly} style={{ ...styles.signalRow, background: 'rgba(239, 68, 68, 0.05)', padding: '6px 8px', borderRadius: '4px', border: '1px solid rgba(239, 68, 68, 0.15)' }}>
+                        <span style={{ color: '#fff' }}>Anomaly: {anomaly.replace(/_/g, ' ')}</span>
+                        <span style={{ color: 'var(--danger)', fontWeight: '600' }}>FLAGGED</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div style={styles.signalRow}>
+                      <span>Device Fingerprint Integrity</span>
+                      <span style={{ color: 'var(--success)', fontWeight: '600' }}>VERIFIED</span>
+                    </div>
+                  )}
+
+                  {/* Behavior Flags */}
+                  {inspectingLog.flags && inspectingLog.flags.length > 0 ? (
+                    inspectingLog.flags.map((flag: string) => (
+                      <div key={flag} style={{ ...styles.signalRow, background: 'rgba(245, 158, 11, 0.05)', padding: '6px 8px', borderRadius: '4px', border: '1px solid rgba(245, 158, 11, 0.15)' }}>
+                        <span style={{ color: '#fff' }}>Kinetics: {flag.replace(/_/g, ' ')}</span>
+                        <span style={{ color: 'var(--warning)', fontWeight: '600' }}>WARNING</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div style={styles.signalRow}>
+                      <span>Kinetics Pattern Analysis</span>
+                      <span style={{ color: 'var(--success)', fontWeight: '600' }}>HUMAN FLOW</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

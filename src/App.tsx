@@ -25,7 +25,9 @@ const INITIAL_LOGS: VerificationLog[] = [
     browser: 'Firefox 125',
     method: 'captcha_3d',
     status: 'passed',
-    riskScore: 12
+    riskScore: 12,
+    flags: [],
+    deviceAnomalies: []
   },
   {
     id: 'req_vms_f8b1c4e9',
@@ -36,7 +38,9 @@ const INITIAL_LOGS: VerificationLog[] = [
     browser: 'Chrome 126',
     method: 'behavioral_telemetry',
     status: 'blocked',
-    riskScore: 98
+    riskScore: 98,
+    flags: ['perfectly_straight_mouse_trajectory', 'zero_mouse_acceleration_variance', 'bot_paste_submit_abuse'],
+    deviceAnomalies: []
   },
   {
     id: 'req_vms_c302d184',
@@ -47,7 +51,9 @@ const INITIAL_LOGS: VerificationLog[] = [
     browser: 'Safari Mobile',
     method: 'behavioral_telemetry',
     status: 'passed',
-    riskScore: 3
+    riskScore: 3,
+    flags: [],
+    deviceAnomalies: []
   },
   {
     id: 'req_vms_7e2d93b1',
@@ -58,7 +64,9 @@ const INITIAL_LOGS: VerificationLog[] = [
     browser: 'Chrome 126 (Headless)',
     method: 'cryptographic_pow',
     status: 'blocked',
-    riskScore: 95
+    riskScore: 95,
+    flags: ['sub_500ms_form_submission_speed'],
+    deviceAnomalies: ['navigator_webdriver_active', 'headless_screen_dimensions_zeroed', 'virtualized_gpu_environment']
   },
   {
     id: 'req_vms_09c8d1f2',
@@ -69,7 +77,9 @@ const INITIAL_LOGS: VerificationLog[] = [
     browser: 'Chrome 126',
     method: 'biometric_scan',
     status: 'passed',
-    riskScore: 8
+    riskScore: 8,
+    flags: [],
+    deviceAnomalies: []
   },
   {
     id: 'req_vms_d48a1c90',
@@ -80,7 +90,9 @@ const INITIAL_LOGS: VerificationLog[] = [
     browser: 'Chrome Mobile',
     method: 'captcha_3d',
     status: 'flagged',
-    riskScore: 54
+    riskScore: 54,
+    flags: ['instant_click_no_deceleration_pause', 'abnormally_low_mouse_dynamics'],
+    deviceAnomalies: []
   }
 ];
 
