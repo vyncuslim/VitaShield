@@ -89,6 +89,70 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const mouseEvents = behavior.mouseEventsCount || 0;
     const keyPresses = behavior.keyPressesCount || 0;
     const scrolls = behavior.scrollsCount || 0;
+    const duration = behavior.durationMs || 1000;
+
+    // 1. Mouse Trajectory Straightness & Velocity Variance Checks
+    const mousePointsList: any[] = behavior.mousePoints || [];
+    if (mousePointsList.length >= 4) {
+      let pathLength = 0;
+      for (let i = 1; i < mousePointsList.length; i++) {
+        const dx = mousePointsList[i].x - mousePointsList[i-1].x;
+        const dy = mousePointsList[i].y - mousePointsList[i-1].y;
+        pathLength += Math.sqrt(dx * dx + dy * dy);
+      }
+      const firstPt = mousePointsList[0];
+      const lastPt = mousePointsList[mousePointsList.length - 1];
+      const fdx = lastPt.x - firstPt.x;
+      const fdy = lastPt.y - firstPt.y;
+      const straightDist = Math.sqrt(fdx * fdx + fdy * fdy);
+
+      if (straightDist > 20) {
+        const ratio = pathLength / straightDist;
+        // Automated script paths are mathematically perfect straight lines (ratio close to 1.0)
+        if (ratio < 1.025) {
+          riskScore += 30;
+          trustScore -= 30;
+          behaviorFlags.push('perfectly_straight_mouse_trajectory');
+        }
+      }
+
+      // Check velocity variance: Bots move at uniform speed (low variance). Humans accelerate/decelerate.
+      let velocities: number[] = [];
+      for (let i = 1; i < mousePointsList.length; i++) {
+        const dx = mousePointsList[i].x - mousePointsList[i-1].x;
+        const dy = mousePointsList[i].y - mousePointsList[i-1].y;
+        const dt = mousePointsList[i].t - mousePointsList[i-1].t || 1;
+        velocities.push(Math.sqrt(dx * dx + dy * dy) / dt);
+      }
+      const avgVel = velocities.reduce((a, b) => a + b, 0) / velocities.length;
+      const velVariance = velocities.reduce((acc, v) => acc + Math.pow(v - avgVel, 2), 0) / velocities.length;
+      if (velVariance < 0.015 && avgVel > 0.05) {
+        riskScore += 25;
+        trustScore -= 25;
+        behaviorFlags.push('zero_mouse_acceleration_variance');
+      }
+    }
+
+    // 2. Keystroke Interval Standard Deviation Checks
+    const keyTimingsList: number[] = behavior.keyTimings || [];
+    if (keyTimingsList.length >= 4) {
+      const avgDelay = keyTimingsList.reduce((a, b) => a + b, 0) / keyTimingsList.length;
+      const variance = keyTimingsList.reduce((acc, t) => acc + Math.pow(t - avgDelay, 2), 0) / keyTimingsList.length;
+      const stdDev = Math.sqrt(variance);
+      // Standard bots type with exact uniform delays (stdDev close to 0)
+      if (stdDev < 8) {
+        riskScore += 30;
+        trustScore -= 30;
+        behaviorFlags.push('perfectly_uniform_keystroke_cadence');
+      }
+    }
+
+    // 3. Overall Session Duration Check (Too fast = Bot signup script)
+    if (duration < 450) {
+      riskScore += 35;
+      trustScore -= 30;
+      behaviorFlags.push('sub_500ms_form_submission_speed');
+    }
 
     if (mouseEvents === 0 && !fingerprint.isMobile) {
       trustScore -= 50;

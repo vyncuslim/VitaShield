@@ -1,5 +1,6 @@
 (function () {
   function initVitaShield() {
+    const startTime = Date.now();
     const container = document.getElementById('vitashield-widget') || document.querySelector('[data-sitekey]');
     if (!container) return;
 
@@ -68,7 +69,8 @@
         mousePoints: [],
         keyTimings: [],
         challengeSolved: false,
-        challengeMethod: 'none'
+        challengeMethod: 'none',
+        durationMs: 0
       }
     };
 
@@ -226,6 +228,8 @@
           });
           return false;
         }
+
+        telemetry.behavior.durationMs = Date.now() - startTime;
 
         const jsonString = JSON.stringify(telemetry);
         const b64Token = btoa(unescape(encodeURIComponent(jsonString)));
