@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { VerificationWidget } from './VerificationWidget/VerificationWidget';
+import { MATRIX_CATEGORIES } from './SystemSpecs';
 
 interface MarketingPortalProps {
   onEnterConsole: () => void;
@@ -10,6 +11,7 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
   const [demoResults, setDemoResults] = useState<any>(null);
   const [demoLoading, setDemoLoading] = useState<boolean>(false);
   const [demoMail, setDemoMail] = useState<string>('tester@company.com');
+  const [activeMatrixCategory, setActiveMatrixCategory] = useState<string>('behavioral');
 
   const handleDemoVerify = async (token: string) => {
     setDemoLoading(true);
@@ -130,6 +132,7 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
         <nav style={styles.topNav}>
           <a href="#features" style={styles.navLink}>Features</a>
           <a href="#pipeline" style={styles.navLink}>How it Works</a>
+          <a href="#matrix" style={styles.navLink}>Defense Matrix</a>
           <a href="#contact" style={styles.navLink}>Contact</a>
           <button onClick={onEnterConsole} style={styles.consoleBtn}>Go to Console</button>
         </nav>
@@ -422,6 +425,94 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
                 Waiting for telemetry packet... Move your mouse organically and click "Verify Submitted Payload" to verify.
               </div>
             )}
+          </div>
+        </div>
+      </section>
+
+      {/* Defense Matrix Section */}
+      <section id="matrix" style={styles.section}>
+        <div style={styles.sectionHeader}>
+          <h2 style={styles.sectionTitle} className="gradient-text">Defense Capability Matrix</h2>
+          <p style={styles.sectionSubtitle}>
+            Explore the 12 multi-layered security dimensions, standard verification methods, and proprietary anti-bot heuristics integrated inside VitaShield.
+          </p>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr', gap: '2rem', marginTop: '2rem', alignItems: 'start', width: '100%', textAlign: 'left' }}>
+          {/* Left Column: Categories List */}
+          <div className="glass-panel" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '6px', background: 'rgba(10,15,30,0.5)' }}>
+            {MATRIX_CATEGORIES.map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setActiveMatrixCategory(cat.id)}
+                style={{
+                  padding: '10px 14px',
+                  background: activeMatrixCategory === cat.id ? 'rgba(6, 182, 212, 0.12)' : 'transparent',
+                  border: activeMatrixCategory === cat.id ? '1px solid rgba(6, 182, 212, 0.3)' : '1px solid transparent',
+                  borderRadius: '8px',
+                  color: activeMatrixCategory === cat.id ? '#00f2fe' : 'var(--text-muted)',
+                  textAlign: 'left',
+                  fontSize: '0.82rem',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  transition: 'all 0.25s ease'
+                }}
+              >
+                {cat.id === 'vitashield' ? '🛡️ ' : ''}{cat.title.split(' (')[0]}
+              </button>
+            ))}
+          </div>
+
+          {/* Right Column: Methods Grid */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {MATRIX_CATEGORIES.filter(cat => cat.id === activeMatrixCategory).map((cat) => (
+              <div key={cat.id}>
+                <div style={{ marginBottom: '1.25rem', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.75rem' }}>
+                  <h3 style={{ fontSize: '1.15rem', color: '#fff', fontWeight: '800', margin: 0 }}>{cat.title}</h3>
+                  <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginTop: '4px', margin: 0, lineHeight: '1.4' }}>{cat.description}</p>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                  {cat.methods.map((method, idx) => (
+                    <div 
+                      key={idx} 
+                      className="glass-panel" 
+                      style={{ 
+                        padding: '1.25rem', 
+                        display: 'flex', 
+                        flexDirection: 'column', 
+                        gap: '10px',
+                        border: cat.id === 'vitashield' ? '1px solid rgba(6, 182, 212, 0.2)' : '1px solid rgba(255,255,255,0.04)',
+                        background: cat.id === 'vitashield' ? 'rgba(6, 182, 212, 0.02)' : 'rgba(255, 255, 255, 0.01)',
+                        transition: 'all 0.3s ease'
+                      }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                        <h4 style={{ fontSize: '0.88rem', color: '#fff', fontWeight: '700', margin: 0, lineHeight: '1.3' }}>{method.name}</h4>
+                        <span 
+                          style={{ 
+                            fontSize: '10px', 
+                            padding: '2px 6px', 
+                            borderRadius: '4px', 
+                            background: method.power === 'Maximum' ? 'rgba(239, 68, 68, 0.15)' : method.power === 'High' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                            color: method.power === 'Maximum' ? 'var(--danger)' : method.power === 'High' ? 'var(--warning)' : 'var(--success)',
+                            fontWeight: '700',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          Power: {method.power}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0, lineHeight: '1.4' }}>{method.desc}</p>
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: '0.72rem', color: 'var(--text-dark)', fontWeight: '600', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '6px' }}>
+                        Difficulty: {method.difficulty}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

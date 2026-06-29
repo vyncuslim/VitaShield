@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const MATRIX_CATEGORIES = [
+export const MATRIX_CATEGORIES = [
   {
     id: 'behavioral',
     title: '1. 行为生物识别类 (Behavioral Biometrics)',
