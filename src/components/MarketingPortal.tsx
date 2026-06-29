@@ -132,7 +132,7 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
         <nav style={styles.topNav}>
           <a href="#features" style={styles.navLink}>Features</a>
           <a href="#pipeline" style={styles.navLink}>How it Works</a>
-          <a href="#pricing" style={styles.navLink}>Pricing</a>
+          <a href="#contact" style={styles.navLink}>Contact</a>
           <button onClick={onEnterConsole} style={styles.consoleBtn}>Go to Console</button>
         </nav>
       </header>
@@ -154,8 +154,8 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
           </p>
 
           <div style={styles.heroCtas}>
-            <button onClick={onEnterConsole} style={styles.primaryCta}>Start Free Plan</button>
-            <a href="#pricing" style={styles.secondaryCta}>View Pricing</a>
+            <button onClick={onEnterConsole} style={styles.primaryCta}>Deploy Shield Console</button>
+            <a href="#contact" style={styles.secondaryCta}>Enterprise Contact</a>
           </div>
         </div>
       </section>
@@ -420,55 +420,41 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
         </div>
       </section>
 
-      {/* Pricing Matrix Section */}
-      <section id="pricing" style={{ ...styles.section, marginBottom: '4rem' }}>
-        <div style={styles.sectionHeader}>
-          <h2 style={styles.sectionTitle} className="gradient-text">Flexible Commercial Plans</h2>
-          <p style={styles.sectionSubtitle}>Scale from basic test sandboxes to millions of requests daily.</p>
-        </div>
-
-        <div style={styles.pricingGrid}>
-          {/* Plan 1 */}
-          <div className="glass-panel" style={styles.pricingCard}>
-            <span style={styles.pricingTier}>Developer MVP</span>
-            <div style={styles.price}>$0</div>
-            <p style={styles.pricingDesc}>Best for small websites, side projects, and sandbox tests.</p>
-            <ul style={styles.pricingFeatures}>
-              <li>1,000 verifications / month</li>
-              <li>Standard Biometric Telemetry</li>
-              <li>Invisible Captcha default</li>
-              <li>Public Status Page access</li>
-            </ul>
-            <button onClick={onEnterConsole} style={styles.pricingCta}>Start Free</button>
+      {/* Enterprise Contact Section */}
+      <section id="contact" style={{ ...styles.section, marginBottom: '4rem', textAlign: 'center' }}>
+        <div className="glass-panel" style={{ maxWidth: '650px', margin: '0 auto', padding: '3rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', border: '1px solid rgba(6, 182, 212, 0.25)' }}>
+          <h2 style={styles.sectionTitle} className="gradient-text">Enterprise Protection Gating</h2>
+          <p style={{ ...styles.sectionSubtitle, maxWidth: '100%' }}>
+            VitaShield provides military-grade security isolation layers designed for high-throughput API gateways and AI operator filters.
+          </p>
+          <div style={{ margin: '1.5rem 0' }}>
+            <a 
+              href="mailto:sales@sleepsomno.com" 
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '12px 28px',
+                background: 'linear-gradient(135deg, #00f2fe 0%, #4facfe 100%)',
+                borderRadius: '30px',
+                color: '#000',
+                fontWeight: 700,
+                fontSize: '0.98rem',
+                textDecoration: 'none',
+                boxShadow: '0 0 20px rgba(0, 242, 254, 0.45)',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.5">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
+              </svg>
+              Contact Sales: sales@sleepsomno.com
+            </a>
           </div>
-
-          {/* Plan 2 */}
-          <div className="glass-panel" style={{ ...styles.pricingCard, border: '1px solid var(--secondary)' }}>
-            <span style={{ ...styles.pricingTier, color: 'var(--secondary)' }}>Pro Growth</span>
-            <div style={styles.price}>$98<span style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>/mo base</span></div>
-            <p style={styles.pricingDesc}>Best for SaaS, Web3 apps, and scaling products.</p>
-            <ul style={styles.pricingFeatures}>
-              <li>Up to 50,000 verifications / month</li>
-              <li>Metered billing ($0.002 / extra req)</li>
-              <li>Rules Customization Engine</li>
-              <li>Slack & Webhook alerts integration</li>
-            </ul>
-            <button onClick={onEnterConsole} style={{ ...styles.pricingCta, background: 'var(--secondary)', color: '#000' }}>Upgrade Pro</button>
-          </div>
-
-          {/* Plan 3 */}
-          <div className="glass-panel" style={styles.pricingCard}>
-            <span style={styles.pricingTier}>Enterprise Suite</span>
-            <div style={styles.price}>Custom</div>
-            <p style={styles.pricingDesc}>Best for high QPS portals, AI clusters, and financial apps.</p>
-            <ul style={styles.pricingFeatures}>
-              <li>Unlimited verifications / SLA</li>
-              <li>OpenAI Operator / Agent filters</li>
-              <li>Federated Fraud Intelligence feed</li>
-              <li>Dedicated multi-region hosting</li>
-            </ul>
-            <button onClick={onEnterConsole} style={styles.pricingCta}>Contact Sales</button>
-          </div>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            Typical setups are review-approved and live within 24 hours. Custom private Edge nodes available.
+          </p>
         </div>
       </section>
     </div>
