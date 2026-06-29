@@ -51,6 +51,19 @@
     let keyTimings = [];
     let lastKeyTime = 0;
 
+    const getWebGLRenderer = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (!gl) return '';
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        if (!debugInfo) return '';
+        return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || '';
+      } catch (e) {
+        return '';
+      }
+    };
+
     let telemetry = {
       fingerprint: {
         userAgent: navigator.userAgent,
@@ -60,6 +73,8 @@
         language: navigator.language || '',
         webdriverActive: navigator.webdriver || false,
         pluginsCount: navigator.plugins ? navigator.plugins.length : 0,
+        webglRenderer: getWebGLRenderer(),
+        outerDimensionsZeroed: (window.outerWidth === 0 && window.outerHeight === 0),
         isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
       },
       behavior: {

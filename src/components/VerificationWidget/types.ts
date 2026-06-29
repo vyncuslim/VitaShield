@@ -6,6 +6,8 @@ export interface TelemetryFingerprint {
   language: string;
   webdriverActive: boolean;
   pluginsCount: number;
+  webglRenderer: string;
+  outerDimensionsZeroed: boolean;
   isMobile: boolean;
 }
 

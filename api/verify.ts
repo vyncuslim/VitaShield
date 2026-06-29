@@ -85,6 +85,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       deviceAnomalies.push('navigator_webdriver_active');
     }
 
+    // WebGL GPU Checking (Indicator of Headless VM Scraper Farms)
+    const webglRenderer = fingerprint.webglRenderer || '';
+    if (webglRenderer) {
+      const virtualGpuPatterns = [
+        /swiftshader/i, /llvmpipe/i, /software rasterizer/i, 
+        /microsoft\s+basic\s+render/i, /virtualbox/i, /vmware/i
+      ];
+      const isVirtualGPU = virtualGpuPatterns.some(pattern => pattern.test(webglRenderer));
+      if (isVirtualGPU) {
+        isAiAgent = true;
+        riskScore += 40;
+        deviceAnomalies.push('virtualized_gpu_environment');
+      }
+    }
+
+    // Outer dimensions check for headless browsers
+    if (fingerprint.outerDimensionsZeroed === true) {
+      riskScore += 30;
+      deviceAnomalies.push('headless_outer_window_anomalies');
+    }
+
     // Layer 2 - Behavior Trust checks (Kinetic Telemetry)
     const mouseEvents = behavior.mouseEventsCount || 0;
     const keyPresses = behavior.keyPressesCount || 0;
@@ -130,6 +151,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         riskScore += 25;
         trustScore -= 25;
         behaviorFlags.push('zero_mouse_acceleration_variance');
+      }
+
+      // Check for human jitter / sub-pixel micro-vibrations
+      let perfectIntegersCount = 0;
+      for (let i = 1; i < mousePointsList.length; i++) {
+        const dx = mousePointsList[i].x - mousePointsList[i-1].x;
+        const dy = mousePointsList[i].y - mousePointsList[i-1].y;
+        if (Number.isInteger(dx) && Number.isInteger(dy)) {
+          perfectIntegersCount++;
+        }
+      }
+      const integerRatio = perfectIntegersCount / (mousePointsList.length - 1);
+      if (integerRatio > 0.98) {
+        riskScore += 20;
+        trustScore -= 20;
+        behaviorFlags.push('artificial_integer_aligned_coordinates');
       }
     }
 
