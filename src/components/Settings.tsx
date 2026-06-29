@@ -235,6 +235,85 @@ export const Settings: React.FC<SettingsProps> = ({ config, setConfig }) => {
               </div>
             </div>
           </div>
+
+          <div className="glass-panel" style={styles.panel}>
+            <h3 style={styles.panelTitle}>Custom Widget Styling & Themes</h3>
+            <p style={styles.panelSubtitle}>Align the interactive verify challenge elements with your website styling themes.</p>
+
+            <div style={{ display: 'flex', gap: '12px', marginTop: '1rem' }}>
+              <div className="input-group" style={{ flex: 1 }}>
+                <label className="input-label" htmlFor="theme-primary">Primary Glow</label>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <input
+                    type="color"
+                    id="theme-primary"
+                    value={localConfig.themePrimary || '#00f2fe'}
+                    onChange={(e) => setLocalConfig(prev => ({ ...prev, themePrimary: e.target.value }))}
+                    style={{ width: '36px', height: '36px', border: 'none', borderRadius: '4px', background: 'transparent', cursor: 'pointer' }}
+                  />
+                  <input
+                    type="text"
+                    value={localConfig.themePrimary || '#00f2fe'}
+                    onChange={(e) => setLocalConfig(prev => ({ ...prev, themePrimary: e.target.value }))}
+                    className="input-field"
+                    style={{ margin: 0 }}
+                  />
+                </div>
+              </div>
+
+              <div className="input-group" style={{ flex: 1 }}>
+                <label className="input-label" htmlFor="theme-bg">Container Background</label>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <input
+                    type="color"
+                    id="theme-bg"
+                    value={localConfig.themeBg || '#0b1329'}
+                    onChange={(e) => setLocalConfig(prev => ({ ...prev, themeBg: e.target.value }))}
+                    style={{ width: '36px', height: '36px', border: 'none', borderRadius: '4px', background: 'transparent', cursor: 'pointer' }}
+                  />
+                  <input
+                    type="text"
+                    value={localConfig.themeBg || '#0b1329'}
+                    onChange={(e) => setLocalConfig(prev => ({ ...prev, themeBg: e.target.value }))}
+                    className="input-field"
+                    style={{ margin: 0 }}
+                  />
+                </div>
+              </div>
+
+              <div className="input-group" style={{ flex: 1 }}>
+                <label className="input-label" htmlFor="theme-text">Text Color</label>
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <input
+                    type="color"
+                    id="theme-text"
+                    value={localConfig.themeText || '#a5f3fc'}
+                    onChange={(e) => setLocalConfig(prev => ({ ...prev, themeText: e.target.value }))}
+                    style={{ width: '36px', height: '36px', border: 'none', borderRadius: '4px', background: 'transparent', cursor: 'pointer' }}
+                  />
+                  <input
+                    type="text"
+                    value={localConfig.themeText || '#a5f3fc'}
+                    onChange={(e) => setLocalConfig(prev => ({ ...prev, themeText: e.target.value }))}
+                    className="input-field"
+                    style={{ margin: 0 }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '1.5rem', background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(6, 182, 212, 0.15)' }}>
+              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--secondary)', marginBottom: '6px' }}>Generated Custom Script Embed Code:</div>
+              <pre style={{ margin: 0, fontSize: '0.75rem', color: '#fff', overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+{`<div id="vitashield-widget"
+     data-sitekey="vms_pub_live_79a2b8e3df9102ca"
+     data-theme-primary="${localConfig.themePrimary || '#00f2fe'}"
+     data-theme-bg="${localConfig.themeBg || '#0b1329'}"
+     data-theme-text="${localConfig.themeText || '#a5f3fc'}">
+</div>`}
+              </pre>
+            </div>
+          </div>
         </div>
 
         {/* Right column - sidebar save and status */}

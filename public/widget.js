@@ -9,6 +9,11 @@
 
     const parentForm = container.closest('form');
 
+    // Extract custom styling data attributes
+    const themePrimary = container.getAttribute('data-theme-primary') || '#00f2fe';
+    const themeBg = container.getAttribute('data-theme-bg') || 'rgba(13, 20, 35, 0.55)';
+    const themeText = container.getAttribute('data-theme-text') || '#94a3b8';
+
     // 1. Render the initial Premium Silent Shield Badge
     const renderDefaultBadge = () => {
       container.innerHTML = `
@@ -17,10 +22,10 @@
           align-items: center;
           gap: 8px;
           padding: 8px 12px;
-          background: rgba(13, 20, 35, 0.55);
-          border: 1px solid rgba(6, 182, 212, 0.15);
+          background: ${themeBg};
+          border: 1px solid ${themePrimary}3d;
           border-radius: 8px;
-          color: #94a3b8;
+          color: ${themeText};
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
           font-size: 11px;
           font-weight: 600;
@@ -32,11 +37,11 @@
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: #00f2fe;
-            box-shadow: 0 0 8px #00f2fe;
+            background: ${themePrimary};
+            box-shadow: 0 0 8px ${themePrimary};
             display: inline-block;
           "></span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#00f2fe" stroke-width="2.5" style="margin-top: -1px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="${themePrimary}" stroke-width="2.5" style="margin-top: -1px;">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
           </svg>
           <span>Protected by <strong style="color: #fff; font-weight: 700;">VitaShield</strong></span>
@@ -116,8 +121,8 @@
         <div id="vms-challenge-container" style="
           width: 250px;
           height: 38px;
-          background: rgba(13, 20, 35, 0.85);
-          border: 1px solid rgba(6, 182, 212, 0.35);
+          background: ${themeBg};
+          border: 1px solid ${themePrimary}5a;
           border-radius: 20px;
           position: relative;
           overflow: hidden;
@@ -126,13 +131,13 @@
           justify-content: center;
           user-select: none;
           font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-          box-shadow: 0 0 12px rgba(6, 182, 212, 0.15);
+          box-shadow: 0 0 12px ${themePrimary}33;
         ">
-          <span style="font-size: 11px; color: #a5f3fc; font-weight: 700; pointer-events: none; z-index: 1;">🛡️ Slide to Verify Humanity</span>
+          <span style="font-size: 11px; color: ${themeText}; font-weight: 700; pointer-events: none; z-index: 1;">🛡️ Slide to Verify Humanity</span>
           <div id="vms-slider-handle" style="
             width: 32px;
             height: 32px;
-            background: #00f2fe;
+            background: ${themePrimary};
             border-radius: 50%;
             position: absolute;
             left: 3px;
@@ -141,7 +146,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 8px #00f2fe;
+            box-shadow: 0 0 8px ${themePrimary};
             z-index: 2;
           ">
             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#080b10" stroke-width="3">

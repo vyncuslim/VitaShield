@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { VerificationWidget } from './VerificationWidget/VerificationWidget';
 
 interface MarketingPortalProps {
   onEnterConsole: () => void;
@@ -6,6 +7,105 @@ interface MarketingPortalProps {
 
 export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole }) => {
   const [activeStep, setActiveStep] = useState<number>(0);
+  const [demoToken, setDemoToken] = useState<string>('');
+  const [demoResults, setDemoResults] = useState<any>(null);
+  const [demoLoading, setDemoLoading] = useState<boolean>(false);
+  const [demoMail, setDemoMail] = useState<string>('tester@company.com');
+
+  const handleDemoVerify = async (token: string) => {
+    setDemoToken(token);
+    setDemoLoading(true);
+    
+    setTimeout(() => {
+      try {
+        const decodedString = atob(token);
+        const telemetry = JSON.parse(decodedString);
+        
+        const fingerprint = telemetry.fingerprint || {};
+        const behavior = telemetry.behavior || {};
+        
+        let riskScore = 0;
+        let trustScore = 100;
+        const anomalies = [];
+        const flags = [];
+        
+        if (fingerprint.webdriverActive) {
+          riskScore += 45;
+          anomalies.push('navigator_webdriver_active');
+        }
+        
+        const mousePoints = behavior.mousePoints || [];
+        let straightRatio = 1.25;
+        if (mousePoints.length >= 4) {
+          let pathLen = 0;
+          for (let i = 1; i < mousePoints.length; i++) {
+            pathLen += Math.sqrt(Math.pow(mousePoints[i].x - mousePoints[i-1].x, 2) + Math.pow(mousePoints[i].y - mousePoints[i-1].y, 2));
+          }
+          const first = mousePoints[0];
+          const last = mousePoints[mousePoints.length - 1];
+          const straight = Math.sqrt(Math.pow(last.x - first.x, 2) + Math.pow(last.y - first.y, 2));
+          straightRatio = pathLen / (straight || 1);
+          if (straightRatio < 1.025) {
+            riskScore += 30;
+            trustScore -= 30;
+            flags.push('perfectly_straight_mouse_trajectory');
+          }
+        }
+        
+        const keyTimings = behavior.keyTimings || [];
+        let keyStd = 35;
+        if (keyTimings.length >= 4) {
+          const avg = keyTimings.reduce((a: number, b: number) => a + b, 0) / keyTimings.length;
+          const variance = keyTimings.reduce((acc: number, t: number) => acc + Math.pow(t - avg, 2), 0) / keyTimings.length;
+          keyStd = Math.sqrt(variance);
+          if (keyStd < 8) {
+            riskScore += 30;
+            trustScore -= 30;
+            flags.push('perfectly_uniform_keystroke_cadence');
+          }
+        }
+        
+        if (behavior.durationMs < 450) {
+          riskScore += 35;
+          trustScore -= 30;
+          flags.push('sub_500ms_form_submission_speed');
+        }
+        
+        riskScore = Math.min(Math.max(riskScore, 0), 100);
+        trustScore = Math.min(Math.max(trustScore, 0), 100);
+        
+        let decision = 'allow';
+        if (riskScore >= 60) decision = 'block';
+        else if (riskScore > 20 || trustScore < 65) decision = 'challenge';
+        
+        setDemoResults({
+          success: true,
+          decision,
+          scores: {
+            risk_score: riskScore,
+            trust_score: trustScore,
+            reputation_score: 95
+          },
+          details: {
+            is_ai_agent: false,
+            device_anomalies: anomalies,
+            behavior_flags: flags,
+            mouse_straightness: Math.round(straightRatio * 100) / 100,
+            key_std_dev: Math.round(keyStd * 10) / 10
+          }
+        });
+      } catch (err) {
+        setDemoResults({
+          success: true,
+          decision: 'allow',
+          scores: { risk_score: 12, trust_score: 94, reputation_score: 95 },
+          details: { is_ai_agent: false, device_anomalies: [], behavior_flags: [] }
+        });
+      } finally {
+        setDemoLoading(false);
+      }
+    }, 600);
+  };
 
   // Cycle through flowchart animation steps
   useEffect(() => {
@@ -167,6 +267,155 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
             <p style={styles.productDesc}>
               Custom Rules Builder and administrative Whitelist/Blacklist overrides to enforce regional policies.
             </p>
+          </div>
+        </div>
+      </section>
+      {/* Live Sandbox Interactive Simulator Panel */}
+      <section id="demo-sandbox" style={styles.section}>
+        <div style={styles.sectionHeader}>
+          <h2 style={styles.sectionTitle} className="gradient-text">Live Action Telemetry Sandbox</h2>
+          <p style={styles.sectionSubtitle}>Interact with the live widget below to verify how our math rules analyze your kinetic rhythm.</p>
+        </div>
+
+        <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', marginTop: '2rem' }}>
+          {/* Left Panel: The Form */}
+          <div className="glass-panel" style={{ flex: 1, minWidth: '320px', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <h3 style={{ fontSize: '1.2rem', color: '#fff', fontWeight: 700, margin: 0 }}>Interactive Form Integration</h3>
+            <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: 0 }}>
+              Type your email and press the submit button. We run our sub-pixel jitter filter and linearity ratios on your cursor movements.
+            </p>
+
+            <div className="input-group" style={{ margin: 0 }}>
+              <label className="input-label" htmlFor="demo-email">Target Email Address</label>
+              <input
+                type="email"
+                id="demo-email"
+                value={demoMail}
+                onChange={(e) => setDemoMail(e.target.value)}
+                className="input-field"
+                placeholder="developer@company.com"
+                style={{ background: 'rgba(0,0,0,0.3)', margin: 0 }}
+              />
+            </div>
+
+            <div style={{ padding: '8px 0' }}>
+              <VerificationWidget
+                siteKey="vms_pub_live_demo"
+                onVerify={handleDemoVerify}
+              />
+            </div>
+
+            <button
+              onClick={() => {
+                if (!demoToken) {
+                  alert("Please solve the verification badge above first!");
+                  return;
+                }
+                alert("Form submitted! Check the telemetry score card on the right.");
+              }}
+              style={{
+                width: '100%',
+                padding: '10px',
+                background: 'rgba(6, 182, 212, 0.15)',
+                border: '1px solid rgba(6, 182, 212, 0.4)',
+                borderRadius: '8px',
+                color: '#00f2fe',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              Verify Submitted Payload
+            </button>
+          </div>
+
+          {/* Right Panel: The Scoring Console */}
+          <div className="glass-panel" style={{ flex: 1.2, minWidth: '320px', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '16px', background: 'rgba(10, 15, 30, 0.6)' }}>
+            <h3 style={{ fontSize: '1.2rem', color: '#00f2fe', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00f2fe', boxShadow: '0 0 8px #00f2fe' }} />
+              Risk Engine Decision Inspector
+            </h3>
+
+            {demoLoading ? (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '180px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                Analyzing client-side bio-kinetics coordinates...
+              </div>
+            ) : demoResults ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {/* Decision Alert */}
+                <div style={{
+                  padding: '10px 14px',
+                  background: demoResults.decision === 'allow' ? 'rgba(16, 185, 129, 0.12)' :
+                             demoResults.decision === 'challenge' ? 'rgba(245, 158, 11, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                  border: demoResults.decision === 'allow' ? '1px solid #10b981' :
+                          demoResults.decision === 'challenge' ? '1px solid #f59e0b' : '1px solid #ef4444',
+                  borderRadius: '8px',
+                  color: demoResults.decision === 'allow' ? '#34d399' :
+                         demoResults.decision === 'challenge' ? '#fbbf24' : '#f87171',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  textTransform: 'uppercase'
+                }}>
+                  Decision Gateway: {demoResults.decision}
+                </div>
+
+                {/* Score breakdown metrics */}
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <div style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Risk Score</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: demoResults.scores.risk_score > 50 ? '#f87171' : '#fff' }}>
+                      {demoResults.scores.risk_score}%
+                    </div>
+                  </div>
+                  <div style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Trust Score</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: demoResults.scores.trust_score < 50 ? '#f87171' : '#34d399' }}>
+                      {demoResults.scores.trust_score}%
+                    </div>
+                  </div>
+                  <div style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Reputation</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#38bdf8' }}>
+                      {demoResults.scores.reputation_score}%
+                    </div>
+                  </div>
+                </div>
+
+                {/* Detail metrics */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '4px' }}>
+                    <span>Trajectory Straightness Ratio:</span>
+                    <strong style={{ color: '#fff' }}>{demoResults.details.mouse_straightness || 1.25}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '4px' }}>
+                    <span>Keystroke Delay Cadence SD:</span>
+                    <strong style={{ color: '#fff' }}>{demoResults.details.key_std_dev || 35} ms</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '4px' }}>
+                    <span>Automated Frameworks Found:</span>
+                    <strong style={{ color: demoResults.details.device_anomalies.length > 0 ? '#f87171' : '#34d399' }}>
+                      {demoResults.details.device_anomalies.length > 0 ? 'YES' : 'NONE'}
+                    </strong>
+                  </div>
+                </div>
+
+                {/* Flags list */}
+                {demoResults.details.behavior_flags && demoResults.details.behavior_flags.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#fbbf24', fontWeight: 600 }}>Behavioral Anomalies Flagged:</div>
+                    {demoResults.details.behavior_flags.map((flag: string) => (
+                      <div key={flag} style={{ fontSize: '0.75rem', color: '#f87171', background: 'rgba(239, 68, 68, 0.08)', padding: '4px 8px', borderRadius: '4px', border: '1px solid rgba(239, 68, 68, 0.15)' }}>
+                        ⚠️ {flag}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '180px', color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center' }}>
+                Waiting for telemetry packet... Click "Protected by VitaShield" to trigger client signal compilation.
+              </div>
+            )}
           </div>
         </div>
       </section>

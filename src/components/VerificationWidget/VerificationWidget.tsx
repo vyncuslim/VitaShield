@@ -4,9 +4,18 @@ import { useBehaviorTracker } from './useBehaviorTracker';
 interface VerificationWidgetProps {
   siteKey: string;
   onVerify: (token: string) => void;
+  themePrimary?: string;
+  themeBg?: string;
+  themeText?: string;
 }
 
-export const VerificationWidget: React.FC<VerificationWidgetProps> = ({ siteKey, onVerify }) => {
+export const VerificationWidget: React.FC<VerificationWidgetProps> = ({
+  siteKey,
+  onVerify,
+  themePrimary = '#00f2fe',
+  themeBg = 'rgba(13, 20, 35, 0.55)',
+  themeText = '#94a3b8'
+}) => {
   const { getTelemetryToken, solveChallenge, mouseEventsCount, isMobile } = useBehaviorTracker();
   const [challengeActive, setChallengeActive] = useState(false);
   const [verified, setVerified] = useState(false);
@@ -88,10 +97,10 @@ export const VerificationWidget: React.FC<VerificationWidgetProps> = ({ siteKey,
             alignItems: 'center',
             gap: '8px',
             padding: '8px 12px',
-            background: verified ? 'rgba(16, 185, 129, 0.12)' : 'rgba(13, 20, 35, 0.55)',
-            border: verified ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(6, 182, 212, 0.15)',
+            background: verified ? 'rgba(16, 185, 129, 0.12)' : themeBg,
+            border: verified ? '1px solid rgba(16, 185, 129, 0.35)' : `1px solid ${themePrimary}3d`,
             borderRadius: '8px',
-            color: verified ? '#34d399' : '#94a3b8',
+            color: verified ? '#34d399' : themeText,
             fontFamily: 'sans-serif',
             fontSize: '11px',
             fontWeight: '600',
@@ -106,10 +115,10 @@ export const VerificationWidget: React.FC<VerificationWidgetProps> = ({ siteKey,
             width: '6px',
             height: '6px',
             borderRadius: '50%',
-            background: verified ? '#10b981' : '#00f2fe',
-            boxShadow: verified ? '0 0 8px #10b981' : '0 0 8px #00f2fe'
+            background: verified ? '#10b981' : themePrimary,
+            boxShadow: verified ? '0 0 8px #10b981' : `0 0 8px ${themePrimary}`
           }} />
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={verified ? '#34d399' : '#00f2fe'} strokeWidth="2.5">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={verified ? '#34d399' : themePrimary} strokeWidth="2.5">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
           </svg>
           <span>
@@ -124,8 +133,8 @@ export const VerificationWidget: React.FC<VerificationWidgetProps> = ({ siteKey,
         <div style={{
           width: '250px',
           height: '38px',
-          background: 'rgba(13, 20, 35, 0.85)',
-          border: '1px solid rgba(6, 182, 212, 0.35)',
+          background: themeBg,
+          border: `1px solid ${themePrimary}5a`,
           borderRadius: '20px',
           position: 'relative',
           overflow: 'hidden',
@@ -133,10 +142,10 @@ export const VerificationWidget: React.FC<VerificationWidgetProps> = ({ siteKey,
           alignItems: 'center',
           justifyContent: 'center',
           userSelect: 'none',
-          boxShadow: '0 0 12px rgba(6, 182, 212, 0.15)',
+          boxShadow: `0 0 12px ${themePrimary}33`,
           fontFamily: 'sans-serif'
         }}>
-          <span style={{ fontSize: '11px', color: '#a5f3fc', fontWeight: '700', pointerEvents: 'none', zIndex: 1 }}>
+          <span style={{ fontSize: '11px', color: themeText, fontWeight: '700', pointerEvents: 'none', zIndex: 1 }}>
             🛡️ Slide to Verify Humanity
           </span>
           <div 
@@ -145,7 +154,7 @@ export const VerificationWidget: React.FC<VerificationWidgetProps> = ({ siteKey,
             style={{
               width: '32px',
               height: '32px',
-              background: '#00f2fe',
+              background: themePrimary,
               borderRadius: '50%',
               position: 'absolute',
               left: `${sliderPosition}px`,
@@ -154,7 +163,7 @@ export const VerificationWidget: React.FC<VerificationWidgetProps> = ({ siteKey,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 8px #00f2fe',
+              boxShadow: `0 0 8px ${themePrimary}`,
               zIndex: 2
             }}
           >

@@ -101,7 +101,10 @@ function App() {
     strictness: 'medium',
     forcedMethod: 'auto',
     bypassIpList: ['127.0.0.1'],
-    blockIpList: []
+    blockIpList: [],
+    themePrimary: '#00f2fe',
+    themeBg: '#0b1329',
+    themeText: '#a5f3fc'
   });
 
   const [logs, setLogs] = useState<VerificationLog[]>([]);
@@ -115,7 +118,10 @@ function App() {
         strictness: 'medium',
         forcedMethod: 'auto',
         bypassIpList: ['127.0.0.1'],
-        blockIpList: []
+        blockIpList: [],
+        themePrimary: '#00f2fe',
+        themeBg: '#0b1329',
+        themeText: '#a5f3fc'
       });
       return;
     }

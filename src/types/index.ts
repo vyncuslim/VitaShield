@@ -16,6 +16,9 @@ export interface ShieldConfig {
   forcedMethod: 'auto' | 'behavioral_telemetry' | 'captcha_3d' | 'biometric_scan' | 'cryptographic_pow';
   bypassIpList: string[];
   blockIpList: string[];
+  themePrimary: string;
+  themeBg: string;
+  themeText: string;
 }
 
 export interface DeveloperKeys {
