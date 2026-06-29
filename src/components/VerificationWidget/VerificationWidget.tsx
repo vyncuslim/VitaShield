@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useBehaviorTracker } from './useBehaviorTracker';
 
 interface VerificationWidgetProps {
@@ -20,22 +20,48 @@ export const VerificationWidget: React.FC<VerificationWidgetProps> = ({
   const [challengeActive, setChallengeActive] = useState(false);
   const [verified, setVerified] = useState(false);
   const [sliderPosition, setSliderPosition] = useState(3);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const handleSubmitIntercept = () => {
-    if (verified) return;
+  // Automatically intercept parent form submissions without requiring clicks
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
 
-    // Check if kinetics look suspicious (no mouse movement and not on mobile)
-    const isSuspicious = mouseEventsCount === 0 && !isMobile;
+    const parentForm = container.closest('form');
+    if (!parentForm) return;
 
-    if (isSuspicious) {
-      setChallengeActive(true);
-      return;
-    }
+    const handleFormSubmit = (e: SubmitEvent) => {
+      if (verified) return;
 
-    const token = getTelemetryToken();
-    setVerified(true);
-    onVerify(token);
-  };
+      // Check if kinetics look suspicious (no mouse movement and not on mobile)
+      const isSuspicious = mouseEventsCount === 0 && !isMobile;
+
+      if (isSuspicious) {
+        e.preventDefault();
+        e.stopPropagation();
+        setChallengeActive(true);
+      } else {
+        const token = getTelemetryToken();
+        
+        // Inject token field into the parent form
+        const oldInput = parentForm.querySelector('input[name="vms-shield-token"]');
+        if (oldInput) oldInput.remove();
+
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'vms-shield-token';
+        hiddenInput.value = token;
+        parentForm.appendChild(hiddenInput);
+
+        onVerify(token);
+      }
+    };
+
+    parentForm.addEventListener('submit', handleFormSubmit);
+    return () => {
+      parentForm.removeEventListener('submit', handleFormSubmit);
+    };
+  }, [verified, mouseEventsCount, isMobile, getTelemetryToken, onVerify]);
 
   const handleSliderDrag = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
     const handle = e.currentTarget;
@@ -75,7 +101,25 @@ export const VerificationWidget: React.FC<VerificationWidgetProps> = ({
       setVerified(true);
       setChallengeActive(false);
       const token = getTelemetryToken();
-      onVerify(token);
+      
+      const parentForm = containerRef.current?.closest('form');
+      if (parentForm) {
+        const oldInput = parentForm.querySelector('input[name="vms-shield-token"]');
+        if (oldInput) oldInput.remove();
+
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'vms-shield-token';
+        hiddenInput.value = token;
+        parentForm.appendChild(hiddenInput);
+        
+        onVerify(token);
+
+        // Resume form submit
+        setTimeout(() => {
+          parentForm.submit();
+        }, 600);
+      }
     };
 
     window.addEventListener('mousemove', onMove);
@@ -85,13 +129,9 @@ export const VerificationWidget: React.FC<VerificationWidgetProps> = ({
   };
 
   return (
-    <div style={{ display: 'inline-block', margin: '0.5rem 0' }}>
-      {/* Hidden input to mimic form integration */}
-      <input type="hidden" name="vms-shield-token" value={verified ? getTelemetryToken() : ''} />
-
+    <div ref={containerRef} style={{ display: 'inline-block', margin: '0.5rem 0' }}>
       {!challengeActive ? (
         <div 
-          onClick={handleSubmitIntercept}
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -104,7 +144,7 @@ export const VerificationWidget: React.FC<VerificationWidgetProps> = ({
             fontFamily: 'sans-serif',
             fontSize: '11px',
             fontWeight: '600',
-            cursor: verified ? 'default' : 'pointer',
+            cursor: 'default',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
             transition: 'all 0.3s ease',
             userSelect: 'none'
