@@ -20,7 +20,7 @@ export const SystemSpecs: React.FC = () => {
       return { 
         tier: 'Pro Growth Tier', 
         cost: Math.round(total * 100) / 100, 
-        desc: 'SaaS multi-tenant billing. Complete access to behavioral biometrics, device trust signals, and Stripe integration.' 
+        desc: 'Complete access to behavioral biometrics, device trust signals, and multi-tenant security consoles.' 
       };
     } else {
       // Enterprise: Custom quoting, discounted rate
@@ -161,7 +161,7 @@ export const SystemSpecs: React.FC = () => {
                   <div style={styles.roadmapHeader}>Phase 2 - Growth</div>
                   <ul style={styles.roadmapList}>
                     <li style={{ color: 'var(--secondary)' }}>→ JS/React/Next SDKs</li>
-                    <li style={{ color: 'var(--secondary)' }}>→ Stripe Billing Portal</li>
+                    <li style={{ color: 'var(--secondary)' }}>→ Granular Filter Console</li>
                     <li style={{ color: 'var(--secondary)' }}>→ Analytics Logs Inspect</li>
                   </ul>
                 </div>
@@ -386,7 +386,7 @@ Content-Type: application/json`}
                   
                   <div style={styles.quoteSlaBox}>
                     <div style={styles.slaItem}>
-                      <span>Billing Model:</span> <strong>Stripe Metered</strong>
+                      <span>Billing Model:</span> <strong>Developer Quotas</strong>
                     </div>
                     <div style={styles.slaItem}>
                       <span>Edge Latency SLA:</span> <strong>{requestVolume > 150000 ? '<100ms' : '<200ms'}</strong>
