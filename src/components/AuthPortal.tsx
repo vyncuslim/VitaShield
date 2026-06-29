@@ -99,7 +99,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthSuccess, onBackToH
     }
 
     if (isSuspicious) {
-      setErrorMsg('VitaShield: 侦测到异常的自动控制轨迹。请拖动滑块解锁登录。');
+      setErrorMsg('VitaShield: Suspicious automation trajectory detected. Please drag the slider to unlock.');
       setChallengeActive(true);
       return;
     }
@@ -139,7 +139,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthSuccess, onBackToH
       }
 
       if (isSignUp) {
-        setSuccessMsg('注册成功！请检查您的邮箱进行激活，然后登录主面板。');
+        setSuccessMsg('Registration successful! Please check your email to activate, then sign in.');
         setIsSignUp(false);
       } else {
         // Sign in successful
@@ -172,10 +172,8 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthSuccess, onBackToH
       <div className="glass-panel" style={styles.authBox}>
         {/* Brand Header */}
         <div style={styles.brandHeader}>
-          <div style={styles.logoIcon}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00f2fe" strokeWidth="2.5">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg>
+          <div style={{ ...styles.logoIcon, background: 'transparent', border: 'none' }}>
+            <img src="/logo.jpg" alt="VitaShield Logo" style={{ width: '100%', height: '100%', borderRadius: '4px', objectFit: 'cover' }} />
           </div>
           <h2 style={styles.brandName}>VitaShield Console</h2>
         </div>
@@ -191,7 +189,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthSuccess, onBackToH
               <line x1="12" y1="16" x2="12" y2="12" />
               <line x1="12" y1="8" x2="12.01" y2="8" />
             </svg>
-            <span>sleepsomno.com 用戶可直接使用原帳號電子信箱與密碼登入</span>
+            <span>sleepsomno.com users can log in directly using their existing credentials.</span>
           </div>
         )}
 
@@ -241,7 +239,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthSuccess, onBackToH
                 boxShadow: '0 0 12px rgba(0, 242, 254, 0.2)'
               }}>
                 <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '700', pointerEvents: 'none', zIndex: 1 }}>
-                  🛡️ 拖动滑块完成人机验证
+                  🛡️ Slide to Verify Humanity
                 </span>
                 <div 
                   onMouseDown={handleSliderDrag}

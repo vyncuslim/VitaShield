@@ -127,10 +127,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, onRet
     <aside style={styles.sidebar}>
       {/* Brand Header */}
       <div style={styles.brandContainer}>
-        <div style={styles.logoIcon}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00f2fe" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-          </svg>
+        <div style={{ ...styles.logoIcon, background: 'transparent', border: 'none' }}>
+          <img src="/logo.jpg" alt="VitaShield Logo" style={{ width: '100%', height: '100%', borderRadius: '4px', objectFit: 'cover' }} />
         </div>
         <div style={styles.brandText}>
           <div style={styles.brandTitle}>VitaShield</div>
