@@ -400,6 +400,36 @@ export const Dashboard: React.FC<DashboardProps> = ({ config, logs }) => {
             </div>
           </div>
 
+          <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
+            <h4 style={{ ...styles.panelTitle, fontSize: '0.92rem', marginBottom: '0.75rem', color: '#fff' }}>Blocked Bot Breakdown</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.8rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--text-muted)' }}>🤖 AI Crawlers & Operators:</span>
+                <span style={{ color: '#fff', fontWeight: '700' }}>
+                  {logs.filter(l => l.deviceAnomalies?.includes('automated_ai_agent_signature') || (l.browser && l.browser.includes('Headless'))).length} blocked
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--text-muted)' }}>⚙️ WebDriver Automation:</span>
+                <span style={{ color: '#fff', fontWeight: '700' }}>
+                  {logs.filter(l => l.deviceAnomalies?.includes('navigator_webdriver_active')).length} blocked
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--text-muted)' }}>🖥️ Virtual Headless VMs:</span>
+                <span style={{ color: '#fff', fontWeight: '700' }}>
+                  {logs.filter(l => l.deviceAnomalies?.includes('virtualized_gpu_environment')).length} blocked
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ color: 'var(--text-muted)' }}>🚫 JS-Disabled Agents:</span>
+                <span style={{ color: '#fff', fontWeight: '700' }}>
+                  {logs.filter(l => l.deviceAnomalies?.includes('javascript_disabled_client')).length} blocked
+                </span>
+              </div>
+            </div>
+          </div>
+
           <div style={styles.warningBox}>
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--warning)" strokeWidth="2">
               <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
