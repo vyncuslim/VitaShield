@@ -155,22 +155,22 @@ export const MATRIX_CATEGORIES = [
   },
   {
     id: 'vitashield',
-    title: '🛡️ VitaShield 专属创新方法 (Proprietary Innovations)',
-    description: 'VitaShield 原創的差異化人機識別黑科技，專門阻擊高度擬真的人類鼠標與鍵盤輸入。',
+    title: '🛡️ VitaShield 独家原创黑科技 (Proprietary Innovations)',
+    description: 'VitaShield 不只是整合業界技術，更自行研發多項專屬檢測演算法，這些技術目前在市面上極少見或尚未被廣泛應用，是我們的核心競爭力。',
     methods: [
-      { name: '微抖动与人类噪声注入检测', desc: '實時採集坐標的小數點精度，識別並阻斷不含生理微抖動的完美 Bot 軌跡。', power: 'Maximum', difficulty: 'Medium' },
-      { name: '操作“犹豫-确认”模式分析', desc: '追蹤「鼠標最後一次移動到點擊按鈕」的生理減速與停頓間隔，Bot 通常點擊無減速。', power: 'Maximum', difficulty: 'Medium' },
-      { name: '多设备/多标签页关联行为检测', desc: '在不同標籤頁間追蹤同一客戶端行為鏈，捕獲並發填表作弊。', power: 'High', difficulty: 'High' },
-      { name: '复制粘贴后的行为链检测', desc: '當複製粘貼後 < 350ms 即爆發提交且缺乏鼠標修正時，判定為機器人批量發帖。', power: 'High', difficulty: 'Low' },
-      { name: '错误修正频率与模式 (Backspace Bonus)', desc: '真人輸入通常伴隨拼寫錯誤與 Backspace 退格修正，給予修錯行為安全加分。', power: 'Medium', difficulty: 'Low' },
-      { name: '页面元素关注顺序熵分析', desc: '計算用戶點擊、懸停頁面各個元素（如 Text, Banner, Form）的焦線熵值。', power: 'High', difficulty: 'Medium' },
-      { name: '时间节律分析 (昼夜节律)', desc: '建模分析用戶個體的晝夜活躍度曲線，檢測出偏離日常作息的突發操作。', power: 'Medium', difficulty: 'Medium' },
-      { name: '“思考时间”动态建模', desc: '依據表單欄位數量與複雜度，動態建立物理合理的「填寫思考時間下限」。', power: 'High', difficulty: 'High' },
-      { name: '行为与内容语义匹配度', desc: '檢測輸入長度與鼠標移動複雜度的比值，防止僅用腳本注入超長文本。', power: 'High', difficulty: 'High' },
-      { name: '渐进式信任积累系统', desc: '新 IP/新設備需要透過連續多次良性提交，逐步在網關積累安全白名單等級。', power: 'High', difficulty: 'Medium' },
-      { name: '攻击样本反向学习机制', desc: '捕獲被滑塊攔截的機器人特徵封包，反向自動優化 Risk Engine 的檢測閥值。', power: 'Maximum', difficulty: 'High' },
-      { name: '混合人类-AI 验证', desc: '結合動態 AI 識別與多種冷門物理學 kinetics，保障數據通道安全。', power: 'High', difficulty: 'High' },
-      { name: '微交互压力测试', desc: '對評估分處於臨界值（如 50-60 分）的用戶，實施隱形微交互考驗（如微幅劃動）。', power: 'Maximum', difficulty: 'Medium' }
+      { name: '专利微抖动与生理噪声注入检测', desc: 'Sub-pixel Jitter Bio-noise Mapping：透過分析滑鼠和點擊行為中的亞像素級微抖動與人類生理雜訊，精準識別高度模擬的自動化腳本。即使 Bot 能模擬軌跡，也難以還原真人操作時自然產生的細微生理波動。', power: 'Maximum', difficulty: 'Medium' },
+      { name: '减速「犹豫-确认」停顿窗口判定', desc: 'Deceleration Hesitation Window Detection：偵測人類在執行重要操作前常出現的「減速 → 短暫停頓 → 確認」行為模式。Bot 通常缺乏這種自然的決策猶豫窗口。', power: 'Maximum', difficulty: 'Medium' },
+      { name: '多标签页关联行为追踪', desc: 'Multi-tab Cross-session Tracing：跨標籤頁追蹤用戶的真實操作流程，分析用戶是否在多個頁面間自然切換與互動。高度自動化的 Bot 難以維持多標籤頁間的邏輯一致性。', power: 'High', difficulty: 'High' },
+      { name: '错误修正与退格信任加权机制', desc: 'Backspace Correction Trust Weighting：將用戶輸入過程中的錯誤修正頻率與模式納入信任評分。真人輸入時通常會出現自然修正行為，而大多數 Bot 則極少犯錯或進行修正。', power: 'Medium', difficulty: 'Low' },
+      { name: '智慧思考时间动态建模', desc: 'Adaptive Thinking Duration Modeling：根據操作複雜度動態計算合理的「思考時間」區間。能有效識別 those在複雜操作中表現出異常快速決策的自動化行為。', power: 'High', difficulty: 'High' },
+      { name: '语义与输入速度一致性检测', desc: 'Semantic-Input Velocity Consistency Engine：分析輸入內容的語義複雜度與實際輸入速度的匹配程度。快速輸入高複雜度或 AI 生成內容的行為會被標記為高風險。', power: 'High', difficulty: 'High' },
+      { name: '渐进式设备信任累积系统', desc: 'Progressive Device Trust Accumulation：新設備或新 IP 必須透過持續的正常行為逐步累積信任分數，而非一次性給予高信任度，有效防範新註冊帳號濫用。', power: 'High', difficulty: 'Medium' },
+      { name: '攻击样本反馈自学习引擎', desc: 'Adversarial Sample Feedback Loop：將被攔截的機器人行為樣本自動回饋至風險引擎，持續優化檢測規則與模型，形成自我進化的防禦系統。', power: 'Maximum', difficulty: 'High' },
+      { name: '微互动压力测试机制', desc: 'Micro-interaction Stress Testing：在風險較高時，隨機要求用戶執行一個極小的自然互動（如輕微滑動或短暫懸停），進一步驗證行為真實性，對高級 Bot 造成極大困擾。', power: 'Maximum', difficulty: 'Medium' },
+      { name: '剪贴簿后置行为链分析', desc: 'Clipboard Post-action Behavior Chain：分析用戶複製貼上後的後續行為（是否會修改、思考或直接提交）。真人通常會對貼上的內容進行調整，而 Bot 多為直接提交。', power: 'High', difficulty: 'Low' },
+      { name: '焦点流动熵值分析', desc: 'Focus Flow Entropy Analysis：計算用戶在頁面內的焦點切換順序與隨機性。真人瀏覽行為具有較高的資訊熵，而自動化腳本的焦點移動通常過於規律。', power: 'High', difficulty: 'Medium' },
+      { name: '操作时序节律异常检测', desc: 'Temporal Rhythm Anomaly Detection：結合用戶歷史操作時段與當前行為的時間節律，檢測異常時段的高風險操作（例如凌晨異常高頻互動）。', power: 'Medium', difficulty: 'Medium' },
+      { name: '混合概率-行为融合评分引擎', desc: 'Hybrid Probabilistic-Behavioral Fusion Engine：將傳統規則引擎與概率模型進行深度融合，同時考量行為特徵與統計異常，輸出更精準的多維度風險評分。', power: 'Maximum', difficulty: 'High' }
     ]
   }
 ];

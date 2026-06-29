@@ -130,11 +130,11 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
         </div>
 
         <nav style={styles.topNav}>
-          <a href="#features" style={styles.navLink}>Features</a>
-          <a href="#pipeline" style={styles.navLink}>How it Works</a>
-          <a href="#matrix" style={styles.navLink}>Defense Matrix</a>
-          <a href="#contact" style={styles.navLink}>Contact</a>
-          <button onClick={onEnterConsole} style={styles.consoleBtn}>Go to Console</button>
+          <a href="#features" style={styles.navLink}>核心优势</a>
+          <a href="#pipeline" style={styles.navLink}>工作原理</a>
+          <a href="#matrix" style={styles.navLink}>黑科技矩阵</a>
+          <a href="#contact" style={styles.navLink}>联系销售</a>
+          <button onClick={onEnterConsole} style={styles.consoleBtn}>进入控制台</button>
         </nav>
       </header>
 
@@ -144,19 +144,46 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
         <div style={styles.heroContent}>
           <div style={styles.heroBadge}>
             <span style={styles.heroBadgePulse} />
-            <span>AI-Native Verification Infrastructure</span>
+            <span>AI-Native 人机验证基础安全设施</span>
           </div>
           <h1 style={styles.heroTitle} className="gradient-text">
-            AI-Native Human <br />
-            Verification Infrastructure
+            VitaShield <br />
+            下一代 AI 原生人类验证与反机器人基础设施
           </h1>
           <p style={styles.heroSubtitle}>
-            Protect your platforms from bots, fraud, and AI-driven abuse. Deploy invisible behavioral telemetry with sub-200ms edge gateway latency.
+            专为对抗进阶自动化与 AI Agent 设计，结合 13 项原创黑科技，实现高精度、低干扰的真实人类验证。
           </p>
 
           <div style={styles.heroCtas}>
-            <button onClick={onEnterConsole} style={styles.primaryCta}>Deploy Shield Console</button>
-            <a href="#contact" style={styles.secondaryCta}>Enterprise Contact</a>
+            <button onClick={onEnterConsole} style={styles.primaryCta}>立即开始使用</button>
+            <a href="#demo-sandbox" style={styles.secondaryCta}>查看技术演示</a>
+          </div>
+        </div>
+      </section>
+
+      {/* Painpoint & Solution Section */}
+      <section style={{ ...styles.section, borderBottom: '1px solid rgba(255, 255, 255, 0.05)', paddingBottom: '3.5rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem' }}>
+          {/* Painpoints */}
+          <div className="glass-panel" style={{ padding: '2rem', borderLeft: '3px solid var(--danger)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <h3 style={{ fontSize: '1.25rem', color: '#fff', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: 'var(--danger)' }}>⚠️</span> 传统验证方式已经失效
+            </h3>
+            <p style={{ fontSize: '0.86rem', color: 'var(--text-muted)', lineHeight: '1.6', margin: 0 }}>
+              现今的机器人与 AI Agent 已经能轻松绕过传统 CAPTCHA、滑块验证，甚至模拟人类行为。
+              企业正面临越来越严重的账号滥用、数据爬取、恶意注册与 API 攻击问题，而现有解决方案往往在准确率与用户体验之间难以平衡。
+            </p>
+          </div>
+
+          {/* Solutions */}
+          <div className="glass-panel" style={{ padding: '2rem', borderLeft: '3px solid var(--primary)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <h3 style={{ fontSize: '1.25rem', color: '#00f2fe', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: 'var(--primary)' }}>🛡️</span> VitaShield：重新定义人类验证
+            </h3>
+            <p style={{ fontSize: '0.86rem', color: 'var(--text-muted)', lineHeight: '1.6', margin: 0 }}>
+              VitaShield 不是另一个验证码，而是新一代 <strong>AI-Native Human Verification Infrastructure</strong>。
+              我们结合行为生物识别、设备指纹与多项原创检测技术，在使用者几乎无感知的情况下，精准判断真实人类与机器人。
+            </p>
           </div>
         </div>
       </section>
@@ -164,8 +191,8 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
       {/* Flowchart "How it Works" Pipeline Section */}
       <section id="pipeline" style={styles.section}>
         <div style={styles.sectionHeader}>
-          <h2 style={styles.sectionTitle} className="gradient-text">How VitaShield Protects Your Platform</h2>
-          <p style={styles.sectionSubtitle}> Cascading 4-layer validation network inspecting traffic silently at the edge.</p>
+          <h2 style={styles.sectionTitle} className="gradient-text">简单三步骤，实现强大防护</h2>
+          <p style={styles.sectionSubtitle}>瀑布式 4 层防御网，在边缘网关无摩擦评估人类与 AI 代理流量。</p>
         </div>
 
         <div className="glass-panel" style={styles.pipelineBox}>
@@ -178,8 +205,8 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
                   <circle cx="12" cy="7" r="4" />
                 </svg>
               </div>
-              <h4 style={styles.nodeTitle}>1. User / Client</h4>
-              <p style={styles.nodeDesc}>Gathers screen size, WebGL browser specs, and mouse velocity.</p>
+              <h4 style={styles.nodeTitle}>1. 无感数据采集</h4>
+              <p style={styles.nodeDesc}>前端静默收集行为轨迹与加速度特徵，无需用戶额外點選或操作。</p>
             </div>
 
             {/* Line 1 */}
@@ -195,8 +222,8 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
                   <polyline points="8 6 2 12 8 18" />
                 </svg>
               </div>
-              <h4 style={styles.nodeTitle}>2. Signal Collection</h4>
-              <p style={styles.nodeDesc}>Encrypts telemetry tokens via JS/React SDK locally.</p>
+              <h4 style={styles.nodeTitle}>2. 编译遙測 Token</h4>
+              <p style={styles.nodeDesc}>藉由 Client SDK 在本地包装加密传输载荷，零延迟并入表单字段。</p>
             </div>
 
             {/* Line 2 */}
@@ -211,8 +238,8 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
                   <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                 </svg>
               </div>
-              <h4 style={styles.nodeTitle}>3. AI Risk Core</h4>
-              <p style={styles.nodeDesc}>Classifies behavior kinetics into 0-100 threat ratings.</p>
+              <h4 style={styles.nodeTitle}>3. 多维度风险评分</h4>
+              <p style={styles.nodeDesc}>透過 Risk Engine 綜合計算風險（0-100）、信任與聲譽分數。</p>
             </div>
 
             {/* Line 3 */}
@@ -227,47 +254,109 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
-              <h4 style={styles.nodeTitle}>4. Gateway Decision</h4>
-              <p style={styles.nodeDesc}>Routes transaction to Allow, Challenge, or Block gates.</p>
+              <h4 style={styles.nodeTitle}>4. 渐进式智能决策</h4>
+              <p style={styles.nodeDesc}>低風險直接放行，高風險觸發適當挑戰，完美平衡安全與體驗。</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Product Features Section */}
+      {/* Product Features & Original Heuristics Section */}
       <section id="features" style={styles.section}>
         <div style={styles.sectionHeader}>
-          <h2 style={styles.sectionTitle} className="gradient-text">Core Security Components</h2>
-          <p style={styles.sectionSubtitle}>Enterprise protection layers defending API entryways.</p>
+          <h2 style={styles.sectionTitle} className="gradient-text">13 大 VitaShield 原创黑科技</h2>
+          <p style={styles.sectionSubtitle}>我们不只整合业界常规技术，更自行研发多项专属人机校验演算法。</p>
         </div>
 
         <div style={styles.productGrid}>
           <div className="glass-panel" style={styles.productCard}>
-            <h4 style={styles.productTitle}>Verify Engine</h4>
+            <h4 style={styles.productTitle}>⚡ 专利微抖动与生理噪声检测</h4>
             <p style={styles.productDesc}>
-              Lightweight HTML/JS widget and React hooks dispatching silent telemetry payloads without client friction.
+              捕捉人類操作中難以模擬的亞像素級微抖動，防止高度模擬的自動化腳本利用直線或勻速軌跡繞過。
             </p>
           </div>
 
           <div className="glass-panel" style={styles.productCard}>
-            <h4 style={styles.productTitle}>AI Risk Core</h4>
+            <h4 style={styles.productTitle}>⏳ 减速「犹豫-确认」停顿判定</h4>
             <p style={styles.productDesc}>
-              Cascading supervised learning pipelines evaluating keyboard dynamics and mouse trajectories.
+              偵測人類在執行點擊等重要操作前常出現的自然的生理減速與決策猶豫時間窗口。
             </p>
           </div>
 
           <div className="glass-panel" style={styles.productCard}>
-            <h4 style={styles.productTitle}>Edge Proxy Gateway</h4>
+            <h4 style={styles.productTitle}>🧠 智慧思考时间动态建模</h4>
             <p style={styles.productDesc}>
-              Cloudflare Edge and Akamai CDN routing validating verification tokens in under 200ms latency.
+              根據當前表單的複雜度和欄位數量，動態計算合理的思考時間區間，封鎖超速提交行為。
             </p>
           </div>
 
           <div className="glass-panel" style={styles.productCard}>
-            <h4 style={styles.productTitle}>Control Center</h4>
+            <h4 style={styles.productTitle}>⌨️ 错误修正与退格信任加权</h4>
             <p style={styles.productDesc}>
-              Custom Rules Builder and administrative Whitelist/Blacklist overrides to enforce regional policies.
+              真人打字常有拼寫錯誤與退格（Backspace）修正行爲，這將轉化為信任分數，而 Bot 很少出錯。
             </p>
+          </div>
+
+          <div className="glass-panel" style={styles.productCard}>
+            <h4 style={styles.productTitle}>🔗 多标签页关联行为追踪</h4>
+            <p style={styles.productDesc}>
+              跨標籤頁分析真實用戶操作鏈的一致性，防止腳本爬蟲進行並發刷量填表操作。
+            </p>
+          </div>
+
+          <div className="glass-panel" style={{ ...styles.productCard, border: '1px solid var(--secondary)', background: 'rgba(6, 182, 212, 0.05)' }}>
+            <h4 style={{ ...styles.productTitle, color: 'var(--secondary)' }}>🛡️ 探索全部 13 项原创技术</h4>
+            <p style={styles.productDesc}>
+              VitaShield 還配備了混合概率評分引擎、剪貼簿後置行為鏈分析等其他 8 項自研防禦黑科技。
+            </p>
+            <div style={{ marginTop: '0.75rem' }}>
+              <a href="#matrix" style={{ color: '#00f2fe', fontWeight: '700', textDecoration: 'none', fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                点击前往矩阵浏览器 <span>→</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Scenarios and Why Choose Grid */}
+      <section style={styles.section}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem', alignItems: 'start' }}>
+          {/* Scenarios */}
+          <div className="glass-panel" style={{ padding: '2rem' }}>
+            <h3 style={{ fontSize: '1.25rem', color: '#fff', fontWeight: 800, marginBottom: '1.25rem' }}>适用于各种高风险场景</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {[
+                { title: 'SaaS 平台注册与登录保护', desc: '阻止自動化垃圾帳號批量註冊、撞庫登入攻擊。' },
+                { title: 'Web3 项目空投与钱包互动防護', desc: '預防女巫攻擊，防範自動化腳本批量擼空投與合約交互。' },
+                { title: 'API 与后端服务防机器人滥用', desc: '保護敏感 API Gateway，防止自動化爬蟲、刷量與重放攻擊。' },
+                { title: '电商、游戏、内容平台防刷单与爬虫', desc: '精準識別惡意刷單、黃牛搶購、內容批量採集器。' },
+                { title: '任何需要高精度人类验证的系统', desc: '零摩擦無感防禦，維護真實業務指標安全。' }
+              ].map((s, idx) => (
+                <div key={idx} style={{ paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                  <h4 style={{ fontSize: '0.9rem', color: '#00f2fe', margin: '0 0 4px 0', fontWeight: '700' }}>• {s.title}</h4>
+                  <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0 }}>{s.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Why VitaShield */}
+          <div className="glass-panel" style={{ padding: '2rem' }}>
+            <h3 style={{ fontSize: '1.25rem', color: '#fff', fontWeight: 800, marginBottom: '1.25rem' }}>为什么选择 VitaShield？</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {[
+                { title: '更强的防护能力', desc: '專為對抗新一代自動化工具與高級 AI Agent 設計。' },
+                { title: '更好的用户体验', desc: '95% 以上真人可完全無感放行，無須反覆做圖形挑戰。' },
+                { title: '持续进化自学习', desc: '具備攻擊樣本反饋反向學習能力，動態升級安全基準。' },
+                { title: '开发者高度友好', desc: '一行代碼嵌入，極簡 REST API 驗證，提供 React/Next.js 等主流支持。' },
+                { title: '企业级高可靠性', desc: '全面支持多租戶隔離日誌、動態自定義安全偏好與威脅控制中心。' }
+              ].map((w, idx) => (
+                <div key={idx}>
+                  <h4 style={{ fontSize: '0.88rem', color: '#fff', margin: '0 0 2px 0', fontWeight: '700' }}>✓ {w.title}</h4>
+                  <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', margin: 0 }}>{w.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -432,9 +521,9 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
       {/* Defense Matrix Section */}
       <section id="matrix" style={styles.section}>
         <div style={styles.sectionHeader}>
-          <h2 style={styles.sectionTitle} className="gradient-text">Defense Capability Matrix</h2>
+          <h2 style={styles.sectionTitle} className="gradient-text">算法与防御能力矩阵 (Defense Capability Matrix)</h2>
           <p style={styles.sectionSubtitle}>
-            Explore the 12 multi-layered security dimensions, standard verification methods, and proprietary anti-bot heuristics integrated inside VitaShield.
+            探索 VitaShield 整合的 12 层安全维度、常规验证方法、以及原创 kinetics 生理特征防御算法。
           </p>
         </div>
 
@@ -520,11 +609,27 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
       {/* Enterprise Contact Section */}
       <section id="contact" style={{ ...styles.section, marginBottom: '4rem', textAlign: 'center' }}>
         <div className="glass-panel" style={{ maxWidth: '650px', margin: '0 auto', padding: '3rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', border: '1px solid rgba(6, 182, 212, 0.25)' }}>
-          <h2 style={styles.sectionTitle} className="gradient-text">Enterprise Protection Gating</h2>
+          <h2 style={styles.sectionTitle} className="gradient-text">准备好升级你的防护系统了吗？</h2>
           <p style={{ ...styles.sectionSubtitle, maxWidth: '100%' }}>
-            VitaShield provides military-grade security isolation layers designed for high-throughput API gateways and AI operator filters.
+            立即体验 VitaShield 的强大防护能力，或申请技术演示。
           </p>
-          <div style={{ margin: '1.5rem 0' }}>
+          <div style={{ margin: '1.5rem 0', display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={onEnterConsole}
+              style={{
+                padding: '12px 28px',
+                background: 'rgba(6, 182, 212, 0.15)',
+                border: '1px solid rgba(6, 182, 212, 0.4)',
+                borderRadius: '30px',
+                color: '#00f2fe',
+                fontWeight: 700,
+                fontSize: '0.98rem',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease'
+              }}
+            >
+              免费开始使用
+            </button>
             <a 
               href="mailto:sales@sleepsomno.com" 
               style={{
@@ -546,11 +651,11 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
                 <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
                 <polyline points="22,6 12,13 2,6" />
               </svg>
-              Contact Sales: sales@sleepsomno.com
+              预约产品演示
             </a>
           </div>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            Typical setups are review-approved and live within 24 hours. Custom private Edge nodes available.
+            如有任何定制化需求，请致信：sales@sleepsomno.com。典型部署最快可在 24 小时内上线。
           </p>
         </div>
       </section>
