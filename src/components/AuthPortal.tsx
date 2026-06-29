@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useBehaviorTracker } from './VerificationWidget/useBehaviorTracker';
 
 // Supabase details from user configuration
 const SUPABASE_URL = 'https://qgoelcorfcqxberbayul.supabase.co';
@@ -17,33 +18,55 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthSuccess, onBackToH
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Verification widget state
-  const [isVerified, setIsVerified] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
+  // Progressive challenge triggers
+  const { getTelemetryToken, solveChallenge, isMobile } = useBehaviorTracker();
+  const [challengeActive, setChallengeActive] = useState(false);
+  const [sliderPosition, setSliderPosition] = useState(3);
 
-  // Telemetry track variables for the widget
-  const [mouseEventsCount, setMouseEventsCount] = useState(0);
+  const handleSliderDrag = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    const handle = e.currentTarget;
+    const track = handle.parentElement;
+    if (!track) return;
 
-  useEffect(() => {
-    const handleMouseMove = () => setMouseEventsCount(c => c + 1);
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+    const maxDrag = track.clientWidth - handle.clientWidth - 6;
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const startX = clientX - sliderPosition;
 
-  // Simulate widget verification
-  const handleVerifyClick = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      // Base64 encode dummy telemetry representing verification pass
-      const payload = {
-        fingerprint: { userAgent: navigator.userAgent, screenWidth: window.screen.width, screenHeight: window.screen.height },
-        behavior: { mouseEventsCount: mouseEventsCount + 10 }
-      };
-      const b64 = btoa(JSON.stringify(payload));
-      setToken(b64);
-      setIsVerified(true);
-      setIsLoading(false);
-    }, 1200);
+    const onMove = (moveEvent: MouseEvent | TouchEvent) => {
+      const currentX = 'touches' in moveEvent ? moveEvent.touches[0].clientX : moveEvent.clientX;
+      let left = currentX - startX;
+      left = Math.max(3, Math.min(left, maxDrag));
+      setSliderPosition(left);
+
+      if (left >= maxDrag - 2) {
+        window.removeEventListener('mousemove', onMove);
+        window.removeEventListener('touchmove', onMove);
+        onSuccess();
+      }
+    };
+
+    const onEnd = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('mouseup', onEnd);
+      window.removeEventListener('touchend', onEnd);
+
+      if (sliderPosition < maxDrag - 2) {
+        setSliderPosition(3);
+      }
+    };
+
+    const onSuccess = () => {
+      solveChallenge('slider');
+      setChallengeActive(false);
+      const token = getTelemetryToken();
+      submitAuth(token);
+    };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onEnd);
+    window.addEventListener('touchmove', onMove, { passive: true });
+    window.addEventListener('touchend', onEnd);
   };
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
@@ -51,12 +74,44 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthSuccess, onBackToH
     setErrorMsg(null);
     setSuccessMsg(null);
 
-    if (!isVerified) {
-      setErrorMsg('Please complete the VitaShield verification check first.');
+    // 1. Gather silent behavioral telemetry
+    const token = getTelemetryToken();
+    let isSuspicious = false;
+
+    try {
+      const decoded = JSON.parse(atob(token));
+      const fingerprint = decoded.fingerprint || {};
+      const behavior = decoded.behavior || {};
+
+      // Flag bot if WebDriver is active or zero mouse coordinates tracked on desktop
+      if (fingerprint.webdriverActive) {
+        isSuspicious = true;
+      }
+      if ((behavior.mouseEventsCount || 0) === 0 && !isMobile) {
+        isSuspicious = true;
+      }
+      // Speed check: suspicious if form filled and submitted under 400ms
+      if ((behavior.durationMs || 0) < 400) {
+        isSuspicious = true;
+      }
+    } catch (err) {
+      isSuspicious = true;
+    }
+
+    if (isSuspicious) {
+      setErrorMsg('VitaShield: 侦测到异常的自动控制轨迹。请拖动滑块解锁登录。');
+      setChallengeActive(true);
       return;
     }
 
+    // 2. Submit clean request
+    submitAuth(token);
+  };
+
+  const submitAuth = async (verifiedToken: string) => {
     setIsLoading(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
 
     try {
       const endpoint = isSignUp 
@@ -65,7 +120,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthSuccess, onBackToH
 
       const bodyObj = isSignUp 
         ? { email, password } 
-        : { email, password, gotrue_meta_security: { token } }; // Pass the verification token to supabase backend metadata
+        : { email, password, gotrue_meta_security: { token: verifiedToken } };
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -84,7 +139,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthSuccess, onBackToH
       }
 
       if (isSignUp) {
-        setSuccessMsg('Registration successful! Please check your email inbox to confirm your account, then Sign In.');
+        setSuccessMsg('注册成功！请检查您的邮箱进行激活，然后登录主面板。');
         setIsSignUp(false);
       } else {
         // Sign in successful
@@ -168,36 +223,59 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthSuccess, onBackToH
             />
           </div>
 
-          {/* Verification Widget Container */}
-          <div style={styles.widgetWrapper}>
-            {!isVerified ? (
-              <div 
-                onClick={isLoading ? undefined : handleVerifyClick} 
-                style={{ ...styles.widgetPlaceholder, cursor: isLoading ? 'default' : 'pointer' }}
-              >
-                <div style={styles.widgetIcon}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" strokeWidth="2.5">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          {/* Conditional Sliding Challenge when suspicious traffic triggers */}
+          {challengeActive && (
+            <div style={{ margin: '12px 0', display: 'flex', justifyContent: 'center' }}>
+              <div style={{
+                width: '100%',
+                height: '38px',
+                background: 'rgba(13, 20, 35, 0.75)',
+                border: '1px solid #00f2fe5a',
+                borderRadius: '20px',
+                position: 'relative',
+                overflow: 'hidden',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                userSelect: 'none',
+                boxShadow: '0 0 12px rgba(0, 242, 254, 0.2)'
+              }}>
+                <span style={{ fontSize: '11px', color: '#94a3b8', fontWeight: '700', pointerEvents: 'none', zIndex: 1 }}>
+                  🛡️ 拖动滑块完成人机验证
+                </span>
+                <div 
+                  onMouseDown={handleSliderDrag}
+                  onTouchStart={handleSliderDrag}
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    background: '#00f2fe',
+                    borderRadius: '50%',
+                    position: 'absolute',
+                    left: `${sliderPosition}px`,
+                    top: '3px',
+                    cursor: 'grab',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 0 8px #00f2fe',
+                    zIndex: 2
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#080b10" strokeWidth="3">
+                    <polyline points="9 18 15 12 9 6" />
                   </svg>
                 </div>
-                <span>{isLoading ? 'Scanning biometrics...' : 'Verify you are human to sign in'}</span>
               </div>
-            ) : (
-              <div style={styles.widgetSuccess}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--success)" strokeWidth="3">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                <span>VitaShield Verification Secured</span>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
 
           <button 
             type="submit" 
-            disabled={isLoading || !isVerified} 
+            disabled={isLoading || challengeActive} 
             style={{ 
               ...styles.submitBtn, 
-              ...(!isVerified || isLoading ? styles.submitBtnDisabled : {}) 
+              ...(isLoading || challengeActive ? styles.submitBtnDisabled : {}) 
             }}
           >
             {isLoading ? 'Processing...' : isSignUp ? 'Create Account' : 'Sign In'}
@@ -212,6 +290,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthSuccess, onBackToH
               setIsSignUp(!isSignUp);
               setErrorMsg(null);
               setSuccessMsg(null);
+              setChallengeActive(false);
             }} 
             style={styles.toggleBtn}
           >
