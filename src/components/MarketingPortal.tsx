@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { VerificationWidget } from './VerificationWidget/VerificationWidget';
+import { useBehaviorTracker } from './VerificationWidget/useBehaviorTracker';
 import { MATRIX_CATEGORIES } from './SystemSpecs';
 
 interface MarketingPortalProps {
@@ -12,6 +13,10 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
   const [demoLoading, setDemoLoading] = useState<boolean>(false);
   const [demoMail, setDemoMail] = useState<string>('tester@company.com');
   const [activeMatrixCategory, setActiveMatrixCategory] = useState<string>('behavioral');
+
+  // Real-time live behavior tracker
+  const { getTelemetryToken } = useBehaviorTracker();
+  const [liveTelemetry, setLiveTelemetry] = useState<any>(null);
 
   const handleDemoVerify = async (token: string) => {
     setDemoLoading(true);
@@ -114,6 +119,96 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
     }, 2500);
     return () => clearInterval(timer);
   }, []);
+
+  // Poll live behavior telemetry for real-time visualization without click
+  useEffect(() => {
+    const interval = setInterval(() => {
+      try {
+        const token = getTelemetryToken();
+        const decodedString = atob(token);
+        const telemetry = JSON.parse(decodedString);
+        
+        const fingerprint = telemetry.fingerprint || {};
+        const behavior = telemetry.behavior || {};
+        
+        let riskScore = 0;
+        let trustScore = 100;
+        const anomalies = [];
+        const flags = [];
+        
+        if (fingerprint.webdriverActive) {
+          riskScore += 45;
+          anomalies.push('navigator_webdriver_active');
+        }
+        
+        const mousePoints = behavior.mousePoints || [];
+        let straightRatio = 1.25;
+        if (mousePoints.length >= 4) {
+          let pathLen = 0;
+          for (let i = 1; i < mousePoints.length; i++) {
+            pathLen += Math.sqrt(Math.pow(mousePoints[i].x - mousePoints[i-1].x, 2) + Math.pow(mousePoints[i].y - mousePoints[i-1].y, 2));
+          }
+          const first = mousePoints[0];
+          const last = mousePoints[mousePoints.length - 1];
+          const straight = Math.sqrt(Math.pow(last.x - first.x, 2) + Math.pow(last.y - first.y, 2));
+          straightRatio = pathLen / (straight || 1);
+          if (straightRatio < 1.025) {
+            riskScore += 30;
+            trustScore -= 30;
+            flags.push('perfectly_straight_mouse_trajectory');
+          }
+        }
+        
+        const keyTimings = behavior.keyTimings || [];
+        let keyStd = 35;
+        if (keyTimings.length >= 4) {
+          const avg = keyTimings.reduce((a: number, b: number) => a + b, 0) / keyTimings.length;
+          const variance = keyTimings.reduce((acc: number, t: number) => acc + Math.pow(t - avg, 2), 0) / keyTimings.length;
+          keyStd = Math.sqrt(variance);
+          if (keyStd < 8) {
+            riskScore += 30;
+            trustScore -= 30;
+            flags.push('perfectly_uniform_keystroke_cadence');
+          }
+        }
+        
+        if (behavior.durationMs < 450) {
+          riskScore += 35;
+          trustScore -= 30;
+          flags.push('sub_500ms_form_submission_speed');
+        }
+        
+        riskScore = Math.min(Math.max(riskScore, 0), 100);
+        trustScore = Math.min(Math.max(trustScore, 0), 100);
+        
+        let decision = 'allow';
+        if (riskScore >= 60) decision = 'block';
+        else if (riskScore > 20 || trustScore < 65) decision = 'challenge';
+        
+        setLiveTelemetry({
+          success: true,
+          decision,
+          scores: {
+            risk_score: riskScore,
+            trust_score: trustScore,
+            reputation_score: 95
+          },
+          details: {
+            is_ai_agent: false,
+            device_anomalies: anomalies,
+            behavior_flags: flags,
+            mouse_straightness: Math.round(straightRatio * 100) / 100,
+            key_std_dev: Math.round(keyStd * 10) / 10,
+            mousePointsCount: mousePoints.length,
+            keyPressesCount: behavior.keyPressesCount || 0
+          }
+        });
+      } catch (err) {
+        // fail silently
+      }
+    }, 150);
+    return () => clearInterval(interval);
+  }, [getTelemetryToken]);
 
   return (
     <div style={styles.container}>
@@ -509,9 +604,92 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
                   </div>
                 )}
               </div>
+            ) : liveTelemetry ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {/* Decision Alert */}
+                <div style={{
+                  padding: '10px 14px',
+                  background: liveTelemetry.decision === 'allow' ? 'rgba(16, 185, 129, 0.12)' :
+                             liveTelemetry.decision === 'challenge' ? 'rgba(245, 158, 11, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+                  border: liveTelemetry.decision === 'allow' ? '1px solid #10b981' :
+                          liveTelemetry.decision === 'challenge' ? '1px solid #f59e0b' : '1px solid #ef4444',
+                  borderRadius: '8px',
+                  color: liveTelemetry.decision === 'allow' ? '#34d399' :
+                         liveTelemetry.decision === 'challenge' ? '#fbbf24' : '#f87171',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  textTransform: 'uppercase',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <span>Decision Gateway: {liveTelemetry.decision}</span>
+                  <span style={{ fontSize: '10px', color: '#00f2fe', fontWeight: 'bold' }}>● LIVE STREAM</span>
+                </div>
+
+                {/* Score breakdown metrics */}
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <div style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Risk Score</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: liveTelemetry.scores.risk_score > 50 ? '#f87171' : '#fff' }}>
+                      {liveTelemetry.scores.risk_score}%
+                    </div>
+                  </div>
+                  <div style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Trust Score</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: liveTelemetry.scores.trust_score < 50 ? '#f87171' : '#34d399' }}>
+                      {liveTelemetry.scores.trust_score}%
+                    </div>
+                  </div>
+                  <div style={{ flex: 1, padding: '10px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Reputation</div>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#38bdf8' }}>
+                      {liveTelemetry.scores.reputation_score}%
+                    </div>
+                  </div>
+                </div>
+
+                {/* Detail metrics */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '4px' }}>
+                    <span>Mouse Points Captured:</span>
+                    <strong style={{ color: '#fff' }}>{liveTelemetry.details.mousePointsCount} / 30</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '4px' }}>
+                    <span>Trajectory Straightness Ratio:</span>
+                    <strong style={{ color: '#fff' }}>{liveTelemetry.details.mouse_straightness || 1.25}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '4px' }}>
+                    <span>Keystrokes Tracked:</span>
+                    <strong style={{ color: '#fff' }}>{liveTelemetry.details.keyPressesCount}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '4px' }}>
+                    <span>Keystroke Delay Cadence SD:</span>
+                    <strong style={{ color: '#fff' }}>{liveTelemetry.details.key_std_dev || 35} ms</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '4px' }}>
+                    <span>Automated Frameworks Found:</span>
+                    <strong style={{ color: liveTelemetry.details.device_anomalies.length > 0 ? '#f87171' : '#34d399' }}>
+                      {liveTelemetry.details.device_anomalies.length > 0 ? 'YES' : 'NONE'}
+                    </strong>
+                  </div>
+                </div>
+
+                {/* Flags list */}
+                {liveTelemetry.details.behavior_flags && liveTelemetry.details.behavior_flags.length > 0 && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <div style={{ fontSize: '0.75rem', color: '#fbbf24', fontWeight: 600 }}>Behavioral Anomalies Flagged:</div>
+                    {liveTelemetry.details.behavior_flags.map((flag: string) => (
+                      <div key={flag} style={{ fontSize: '0.75rem', color: '#f87171', background: 'rgba(239, 68, 68, 0.08)', padding: '4px 8px', borderRadius: '4px', border: '1px solid rgba(239, 68, 68, 0.15)' }}>
+                        ⚠️ {flag}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '180px', color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center' }}>
-                Waiting for telemetry packet... Move your mouse organically and click "Verify Submitted Payload" to verify.
+                Waiting for telemetry packet... Move your mouse organically to verify.
               </div>
             )}
           </div>
