@@ -7,13 +7,11 @@ interface MarketingPortalProps {
 
 export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole }) => {
   const [activeStep, setActiveStep] = useState<number>(0);
-  const [demoToken, setDemoToken] = useState<string>('');
   const [demoResults, setDemoResults] = useState<any>(null);
   const [demoLoading, setDemoLoading] = useState<boolean>(false);
   const [demoMail, setDemoMail] = useState<string>('tester@company.com');
 
   const handleDemoVerify = async (token: string) => {
-    setDemoToken(token);
     setDemoLoading(true);
     
     setTimeout(() => {
@@ -279,7 +277,20 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
 
         <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', marginTop: '2rem' }}>
           {/* Left Panel: The Form */}
-          <div className="glass-panel" style={{ flex: 1, minWidth: '320px', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const token = formData.get('vms-shield-token') as string;
+              if (token) {
+                handleDemoVerify(token);
+              } else {
+                alert("Invisible verification active. Please fill out email and submit to compile telemetry.");
+              }
+            }}
+            className="glass-panel" 
+            style={{ flex: 1, minWidth: '320px', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '16px' }}
+          >
             <h3 style={{ fontSize: '1.2rem', color: '#fff', fontWeight: 700, margin: 0 }}>Interactive Form Integration</h3>
             <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: 0 }}>
               Type your email and press the submit button. We run our sub-pixel jitter filter and linearity ratios on your cursor movements.
@@ -295,6 +306,7 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
                 className="input-field"
                 placeholder="developer@company.com"
                 style={{ background: 'rgba(0,0,0,0.3)', margin: 0 }}
+                required
               />
             </div>
 
@@ -306,13 +318,7 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
             </div>
 
             <button
-              onClick={() => {
-                if (!demoToken) {
-                  alert("Please solve the verification badge above first!");
-                  return;
-                }
-                alert("Form submitted! Check the telemetry score card on the right.");
-              }}
+              type="submit"
               style={{
                 width: '100%',
                 padding: '10px',
@@ -327,7 +333,7 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
             >
               Verify Submitted Payload
             </button>
-          </div>
+          </form>
 
           {/* Right Panel: The Scoring Console */}
           <div className="glass-panel" style={{ flex: 1.2, minWidth: '320px', padding: '2rem', display: 'flex', flexDirection: 'column', gap: '16px', background: 'rgba(10, 15, 30, 0.6)' }}>
@@ -413,7 +419,7 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
               </div>
             ) : (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '180px', color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center' }}>
-                Waiting for telemetry packet... Click "Protected by VitaShield" to trigger client signal compilation.
+                Waiting for telemetry packet... Move your mouse organically and click "Verify Submitted Payload" to verify.
               </div>
             )}
           </div>
