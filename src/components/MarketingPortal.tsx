@@ -13,6 +13,7 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
   const [demoLoading, setDemoLoading] = useState<boolean>(false);
   const [demoMail, setDemoMail] = useState<string>('tester@company.com');
   const [activeMatrixCategory, setActiveMatrixCategory] = useState<string>('behavioral');
+  const [docsTab, setDocsTab] = useState<'nodejs' | 'python' | 'go' | 'curl'>('nodejs');
 
   // Real-time live behavior tracker
   const { getTelemetryToken } = useBehaviorTracker();
@@ -226,6 +227,7 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
           <a href="#features" style={styles.navLink}>Features</a>
           <a href="#pipeline" style={styles.navLink}>How it Works</a>
           <a href="#matrix" style={styles.navLink}>Defense Matrix</a>
+          <a href="#docs" style={styles.navLink}>Documentation</a>
           <a href="#contact" style={styles.navLink}>Contact</a>
           <button onClick={onEnterConsole} style={styles.consoleBtn}>Go to Console</button>
         </nav>
@@ -778,6 +780,192 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Developer Docs & Quick Start Section */}
+      <section id="docs" style={styles.section}>
+        <div style={styles.sectionHeader}>
+          <h2 style={styles.sectionTitle} className="gradient-text">Developer Quick Start & Docs</h2>
+          <p style={styles.sectionSubtitle}>
+            Embed the frontend telemetry widget and verify tokens on your server in minutes.
+          </p>
+        </div>
+
+        <div className="glass-panel" style={{ padding: '2rem', marginTop: '2rem', textAlign: 'left' }}>
+          <h3 style={{ fontSize: '1.25rem', color: '#fff', fontWeight: 800, marginBottom: '1.5rem' }}>
+            How to Integrate VitaShield: Step-by-Step
+          </h3>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5rem', flexWrap: 'wrap' }}>
+            {/* Step 1: Frontend */}
+            <div>
+              <h4 style={{ fontSize: '1.05rem', color: '#00f2fe', margin: '0 0 10px 0', fontWeight: '800' }}>
+                Step 1: Frontend Telemetry Widget
+              </h4>
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: '1.5', marginBottom: '1.25rem' }}>
+                Load our client-side SDK in your HTML header. It silently monitors organic human biological rhythms (mouse speed, deceleration hesitation, typing flight/dwell times) to generate cryptographic trust tokens.
+              </p>
+              
+              <div style={{ background: 'rgba(5, 7, 12, 0.9)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '1rem', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', overflowX: 'auto', color: '#e2e8f0' }}>
+                <div style={{ color: '#6b7280', marginBottom: '0.5rem' }}>{"<!-- Load the SDK client -->"}</div>
+                <div style={{ color: '#38bdf8' }}>
+                  {"<script "}
+                  <span style={{ color: '#fbbf24' }}>src</span>
+                  {"="}
+                  <span style={{ color: '#34d399' }}>"https://cdn.vitashield.sleepsomno.com/shield/v1/widget.js"</span>
+                  {" async defer></script>"}
+                </div>
+                <br />
+                <div style={{ color: '#6b7280', marginBottom: '0.5rem' }}>{"<!-- Form container -->"}</div>
+                <div style={{ color: '#38bdf8' }}>
+                  {"<form "}
+                  <span style={{ color: '#fbbf24' }}>id</span>
+                  {"="}
+                  <span style={{ color: '#34d399' }}>"auth-form"</span>
+                  {" "}
+                  <span style={{ color: '#fbbf24' }}>action</span>
+                  {"="}
+                  <span style={{ color: '#34d399' }}>"/submit"</span>
+                  {" "}
+                  <span style={{ color: '#fbbf24' }}>method</span>
+                  {"="}
+                  <span style={{ color: '#34d399' }}>"POST"</span>
+                  {">"}
+                </div>
+                <div style={{ paddingLeft: '1rem', color: '#38bdf8' }}>
+                  {"<input "}
+                  <span style={{ color: '#fbbf24' }}>type</span>
+                  {"="}
+                  <span style={{ color: '#34d399' }}>"email"</span>
+                  {" required />"}
+                  <br />
+                  {"<!-- VitaShield Widget - Zero human clicks required -->"}
+                  <br />
+                  {"<div "}
+                  <span style={{ color: '#fbbf24' }}>id</span>
+                  {"="}
+                  <span style={{ color: '#34d399' }}>"vitamind-shield-widget"</span>
+                  {" "}
+                  <span style={{ color: '#fbbf24' }}>data-sitekey</span>
+                  {"="}
+                  <span style={{ color: '#34d399' }}>"vms_pub_live_79a2b8e3df9102ca"</span>
+                  {"></div>"}
+                  <br />
+                  {"<button "}
+                  <span style={{ color: '#fbbf24' }}>type</span>
+                  {"="}
+                  <span style={{ color: '#34d399' }}>"submit"</span>
+                  {">Login Securely</button>"}
+                </div>
+                <div style={{ color: '#38bdf8' }}>
+                  {"</form>"}
+                </div>
+              </div>
+            </div>
+
+            {/* Step 2: Backend */}
+            <div>
+              <h4 style={{ fontSize: '1.05rem', color: '#00f2fe', margin: '0 0 10px 0', fontWeight: '800' }}>
+                Step 2: Backend API Verification
+              </h4>
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', lineHeight: '1.5', marginBottom: '1.25rem' }}>
+                When your form is submitted, VitaShield automatically appends a hidden token named <code>vms-shield-token</code> to your payload. Query our secure verify endpoint on your server before processing the request.
+              </p>
+
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
+                {['nodejs', 'python', 'go', 'curl'].map((lang) => (
+                  <button
+                    key={lang}
+                    type="button"
+                    onClick={() => setDocsTab(lang as any)}
+                    style={{
+                      padding: '4px 10px',
+                      background: docsTab === lang ? 'rgba(6, 182, 212, 0.12)' : 'rgba(255,255,255,0.02)',
+                      border: docsTab === lang ? '1px solid rgba(6, 182, 212, 0.3)' : '1px solid rgba(255,255,255,0.05)',
+                      borderRadius: '6px',
+                      color: docsTab === lang ? '#00f2fe' : 'var(--text-muted)',
+                      fontSize: '0.74rem',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      textTransform: 'uppercase'
+                    }}
+                  >
+                    {lang}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ background: 'rgba(5, 7, 12, 0.9)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '1rem', fontFamily: 'var(--font-mono)', fontSize: '0.78rem', overflowX: 'auto', color: '#e2e8f0', height: '180px' }}>
+                {docsTab === 'nodejs' && (
+                  <pre style={{ margin: 0 }}>{`// Node.js Express Backend
+app.post('/submit', async (req, res) => {
+  const token = req.body['vms-shield-token'];
+  
+  // Call secure verification route
+  const verify = await fetch('https://api.vitashield.sleepsomno.com/v1/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      secret: 'vms_sec_live_9c0f73b18274d8a21f7c',
+      token: token,
+      ip: req.ip
+    })
+  });
+  
+  const result = await verify.json();
+  if (result.success && result.risk_score < 60) {
+    res.send("Authentication Successful!");
+  } else {
+    res.status(403).send("Bot activity blocked.");
+  }
+});`}</pre>
+                )}
+                {docsTab === 'python' && (
+                  <pre style={{ margin: 0 }}>{`# Python Flask / requests verify
+import requests
+
+def verify_session(token, client_ip):
+    url = "https://api.vitashield.sleepsomno.com/v1/verify"
+    payload = {
+        "secret": "vms_sec_live_9c0f73b18274d8a21f7c",
+        "token": token,
+        "ip": client_ip
+    }
+    r = requests.post(url, json=payload, timeout=5)
+    result = r.json()
+    
+    # Return success validation flags
+    return result.get("success") and result.get("risk_score") < 60`}</pre>
+                )}
+                {docsTab === 'go' && (
+                  <pre style={{ margin: 0 }}>{`// Golang verify logic
+func verifyToken(token string, ip string) bool {
+    client := &http.Client{Timeout: 5 * time.Second}
+    payload := map[string]string{
+        "secret": "vms_sec_live_9c0f73b18274d8a21f7c",
+        "token":  token,
+        "ip":     ip,
+    }
+    body, _ := json.Marshal(payload)
+    resp, err := client.Post("https://api.vitashield.sleepsomno.com/v1/verify", "application/json", bytes.NewBuffer(body))
+    // Decode and parse risk_score ...
+    return riskScore < 60
+}`}</pre>
+                )}
+                {docsTab === 'curl' && (
+                  <pre style={{ margin: 0 }}>{`# Shell verify script curl query
+curl -X POST https://api.vitashield.sleepsomno.com/v1/verify \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "secret": "vms_sec_live_9c0f73b18274d8a21f7c",
+    "token": "token_from_client_form",
+    "ip": "1.2.3.4"
+  }'`}</pre>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </section>
