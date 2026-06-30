@@ -3,179 +3,177 @@ import React, { useState } from 'react';
 export const MATRIX_CATEGORIES = [
   {
     id: 'behavioral',
-    title: '1. 行为生物识别类 (Behavioral Biometrics)',
-    description: '通过分析人手部肌肉的微小抖動及操作節奏，精準區分真實人類與自動化腳本。',
+    title: '1. Behavioral Biometrics',
+    description: 'Analyze fine-grained mouse movements and operator cadences to distinguish human users from automation scripts.',
     methods: [
-      { name: '鼠标轨迹直线度、曲率、加速度变化', desc: '檢測滑鼠運動路徑是否呈現過於完美的直線或規律的加減速特徵。', power: 'High', difficulty: 'Medium' },
-      { name: '鼠标速度方差与加速度方差', desc: '真人操作具備自然的生理噪聲與不規律性，機械操作速度方差極低。', power: 'High', difficulty: 'Medium' },
-      { name: '点击位置分布、点击间隔、点击后停留时间', desc: '分析滑鼠點擊是否精準落在按鈕幾何中心，以及點擊鬆開的微秒級間隔。', power: 'Medium', difficulty: 'Low' },
-      { name: '键盘输入节奏 (Dwell/Flight Time + 错误修正)', desc: '計算按鍵壓下時長（Dwell）與按鍵切換間隔（Flight），建構輸入特徵模型。', power: 'High', difficulty: 'High' },
-      { name: '滚动速度、停顿、回滚行为', desc: '分析閱讀頁面時的滾動停頓點、回看滾動幅度與加速度曲線。', power: 'Medium', difficulty: 'Medium' },
-      { name: '焦点切换模式与切换速度', desc: '檢測瀏覽器窗口、輸入框焦點切換的邏輯順序與反應時間。', power: 'High', difficulty: 'Medium' },
-      { name: '悬停 (Hover) 时间与微小移动', desc: '滑鼠懸停在元素上方時，分析是否存在人類特有的生理微震顫。', power: 'Medium', difficulty: 'Medium' },
-      { name: '页面内多元素交互顺序', desc: '真人瀏覽通常有自上而下、焦點偏移等認知邏輯，Bot 多為直奔目標。', power: 'High', difficulty: 'Medium' },
-      { name: '整体操作流程的“犹豫-行动”模式', desc: '評估用戶在進行關鍵點擊前是否存在思考停頓與軌跡減速。', power: 'High', difficulty: 'Medium' },
-      { name: '多标签页 / 多窗口切换行为', desc: '追蹤同個客戶端在多個分頁、視窗間的高頻並發切換特徵。', power: 'High', difficulty: 'High' }
+      { name: 'Mouse Path Straightness, Curvature & Velocity', desc: 'Detect if mouse movement paths exhibit overly perfect lines or predictable acceleration parameters.', power: 'High', difficulty: 'Medium' },
+      { name: 'Velocity and Acceleration Variance', desc: 'Humans produce organic physiological noise. Automated scripts exhibit near-zero velocity variance.', power: 'High', difficulty: 'Medium' },
+      { name: 'Click Position and Mouse Down Intervals', desc: 'Analyze whether mouse clicks land exactly on target centers, and measure millisecond-level mouse-down intervals.', power: 'Medium', difficulty: 'Low' },
+      { name: 'Keyboard Input Rhythm (Dwell / Flight Time)', desc: 'Measure key press durations (Dwell) and typing transitions (Flight) to train keystroke dynamics classifiers.', power: 'High', difficulty: 'High' },
+      { name: 'Scroll Speeds, Decelerations & Rebounds', desc: 'Examine scrolling pause triggers, backward scroll rates, and scrolling acceleration curves during page reading.', power: 'Medium', difficulty: 'Medium' },
+      { name: 'Focus Handshake Patterns and Latencies', desc: 'Track focus changes across window tabs and text inputs to identify robotic sequential behaviors.', power: 'High', difficulty: 'Medium' },
+      { name: 'Hover Duration and Organic Tremors', desc: 'Analyze micro-movement jitter while a cursor hovers over interface elements to capture physiological noise.', power: 'Medium', difficulty: 'Medium' },
+      { name: 'Multi-element Navigation Sequences', desc: 'Human user patterns flow top-down based on cognitive pathways. Bots move instantly to target fields.', power: 'High', difficulty: 'Medium' },
+      { name: 'Overall Hesitation-Action Time Windows', desc: 'Assess whether client cursor velocity decelerates organically before committing critical form clicks.', power: 'High', difficulty: 'Medium' },
+      { name: 'Multi-tab and Concurrent Window Switches', desc: 'Monitor concurrent actions across multiple browser contexts to catch concurrent submission bots.', power: 'High', difficulty: 'High' }
     ]
   },
   {
     id: 'fingerprint',
-    title: '2. 设备与环境指纹类 (Device & Environment)',
-    description: '深度檢測客戶端 JavaScript 執行環境、硬體圖形渲染能力與底層系統特徵。',
+    title: '2. Device & Environment Fingerprinting',
+    description: 'Inspect execution environments, browser capabilities, graphic engines, and system markers.',
     methods: [
-      { name: 'WebDriver / 自动化框架特征检测', desc: '掃描 navigator.webdriver、chrome.runtime 等自動化驅動變量。', power: 'Maximum', difficulty: 'Low' },
-      { name: 'Canvas、WebGL、WebGPU 指纹', desc: '利用 GPU 渲染微小差異，提取硬體特定的圖形渲染特徵碼。', power: 'High', difficulty: 'Medium' },
-      { name: '字体、插件、扩展指纹', desc: '枚舉系統字體列表、瀏覽器插件與已安裝的擴展特徵。', power: 'Medium', difficulty: 'Medium' },
-      { name: '音频指纹 (AudioContext + Oscillator)', desc: '藉由音頻合成器產生無聲正弦波，分析音效卡與解碼器的渲染噪聲。', power: 'Medium', difficulty: 'High' },
-      { name: '传感器指纹 (加速度、陀螺仪、触摸压力)', desc: '在移動端收集螢幕觸控面積、滑動壓力、以及陀螺儀的三維傾角變化。', power: 'High', difficulty: 'High' },
-      { name: 'TLS/JA3/JA4 指纹', desc: '在 TCP 握手階段分析客戶端發送的密碼套件順序，識別隱藏的 Curl/HTTP 庫。', power: 'Maximum', difficulty: 'High' },
-      { name: 'HTTP/2 指纹 + 请求头指纹', desc: '比對 HTTP/2 連接參數、窗口大小以及 Request Header 的大小寫順序。', power: 'High', difficulty: 'High' },
-      { name: 'WebRTC 泄露与行为', desc: '透過 WebRTC 接口探測真實內網 IP 及媒體輸入輸出設備清單。', power: 'Medium', difficulty: 'Medium' },
-      { name: '电池状态、充电状态 (移动端)', desc: '獲取電池剩餘電量、是否正在充電，輔助判斷是否為實體手機牆。', power: 'Medium', difficulty: 'Low' },
-      { name: '屏幕刷新率、颜色配置文件', desc: '讀取螢幕物理刷新率（如 60Hz, 120Hz）與色彩空間（sRGB/P3）。', power: 'Medium', difficulty: 'Low' },
-      { name: 'JavaScript 引擎性能指纹', desc: '執行基準算法測試，評估 JS 引擎在特定 CPU 下的浮點運算耗時。', power: 'High', difficulty: 'High' },
-      { name: 'WebAssembly 执行特征', desc: '檢測 WASM 支持度、編譯速度以及執行複雜運算時的線程行為。', power: 'High', difficulty: 'Medium' }
+      { name: 'WebDriver & Automation Framework Markers', desc: 'Verify indicators like navigator.webdriver, chrome.runtime, and Selenium driver variables.', power: 'Maximum', difficulty: 'Low' },
+      { name: 'Canvas, WebGL, and WebGPU Fingerprints', desc: 'Extract hardware-specific GPU rendering codes using graphics render pipelines.', power: 'High', difficulty: 'Medium' },
+      { name: 'System Fonts, Plugins, and Extensions', desc: 'Enumerate system font availability and browser extension signatures.', power: 'Medium', difficulty: 'Medium' },
+      { name: 'Audio Fingerprint (AudioContext)', desc: 'Generate silent sine waves via browser oscillator APIs to map audio rendering noise differences.', power: 'Medium', difficulty: 'High' },
+      { name: 'Mobile Sensors (Gyroscope, Accelerometer)', desc: 'Capture touch surface dimensions, touch pressure curves, and gyroscope coordinates on mobile browsers.', power: 'High', difficulty: 'High' },
+      { name: 'TLS / JA3 / JA4 Fingerprinting', desc: 'Inspect SSL/TLS cipher suites during network handshakes to match Curl or headless library signatures.', power: 'Maximum', difficulty: 'High' },
+      { name: 'HTTP/2 Settings and Header Ordering', desc: 'Compare HTTP/2 flow window sizes and request header case conventions against normal browsers.', power: 'High', difficulty: 'High' },
+      { name: 'WebRTC Interface Leak Detection', desc: 'Probe local private IP addresses and multimedia hardware profiles via WebRTC sockets.', power: 'Medium', difficulty: 'Medium' },
+      { name: 'Battery Status and Power States', desc: 'Query device battery percentage and charge states to intercept mobile phone farms.', power: 'Medium', difficulty: 'Low' },
+      { name: 'Refresh Rates and Color Gamut Profiling', desc: 'Inspect monitor refresh speeds (e.g. 60Hz vs 120Hz) and color profiles (sRGB/P3 gamut).', power: 'Medium', difficulty: 'Low' },
+      { name: 'JavaScript Engine Execution Benchmarks', desc: 'Execute micro-benchmark algorithms to evaluate JS execution speed deviations across CPUs.', power: 'High', difficulty: 'High' },
+      { name: 'WebAssembly Compilation Fingerprints', desc: 'Determine WASM support, compilation timings, and thread pools behavior.', power: 'High', difficulty: 'Medium' }
     ]
   },
   {
     id: 'temporal',
-    title: '3. 时间与模式分析类 (Temporal & Patterns)',
-    description: '分析請求發送的時間戳分佈，捕捉機器人高頻、規律性的排程提交。',
+    title: '3. Temporal & Patterns Analysis',
+    description: 'Monitor temporal intervals and submission frequencies to catch scheduling scripts.',
     methods: [
-      { name: '极短时间表单提交', desc: '攔截頁面加載後瞬間（如 <500ms）即提交表單的超人類行為。', power: 'Maximum', difficulty: 'Low' },
-      { name: '操作间隔的规律性 (方差分析)', desc: '計算多次請求間隔的標準差，精準識別定時觸發的自動化任務。', power: 'High', difficulty: 'Medium' },
-      { name: '思考时间 / 犹豫时间检测', desc: '比對用戶輸入密碼、閱讀條款時應有的邏輯停頓時長。', power: 'Medium', difficulty: 'Medium' },
-      { name: '夜间异常高频操作', desc: '結合本時區昼夜作息規律，對凌晨高頻率爆發的動作進行提權校驗。', power: 'Medium', difficulty: 'Low' },
-      { name: '连续动作的时间分布熵 (Entropy)', desc: '計算動作序列的時間熵值，規律性越高的 Bot 時間熵越接近零。', power: 'High', difficulty: 'High' },
-      { name: '页面停留时间与行为匹配度', desc: '比對頁面總停留時長與產生的滾動、點擊次數是否相符。', power: 'High', difficulty: 'Medium' }
+      { name: 'Sub-500ms Instant Form Submission', desc: 'Intercept forms filled and submitted instantly after page load, bypassing human reading limits.', power: 'Maximum', difficulty: 'Low' },
+      { name: 'Transaction Frequency Variance Analysis', desc: 'Calculate the standard deviation of transaction intervals to locate cron jobs or scheduled actions.', power: 'High', difficulty: 'Medium' },
+      { name: 'Cognitive Reading & Hesitation Intervals', desc: 'Cross-check password typing and form reads with standard human cognitive speeds.', power: 'Medium', difficulty: 'Medium' },
+      { name: 'Off-hours Activity Spikes', desc: 'Correlate high frequency activity spikes during local night hours with bot subnet activity.', power: 'Medium', difficulty: 'Low' },
+      { name: 'Keystroke and Click Rhythm Entropy', desc: 'Calculate the entropy of action chains; automated scripts score near-zero entropy.', power: 'High', difficulty: 'High' },
+      { name: 'Page Residency vs Interactive Count Ratio', desc: 'Match total tab time against the quantity of mouse scrolls and clicks to weed out idle scraper bots.', power: 'High', difficulty: 'Medium' }
     ]
   },
   {
     id: 'challenge',
-    title: '4. 挑战响应类 (Challenge Response)',
-    description: '在風險升高時主動下發動態挑戰，驗證客戶端交互的真實性。',
+    title: '4. Interactive Challenge-Responses',
+    description: 'Route suspect payloads through visual, cryptographic, or biometric verification gates.',
     methods: [
-      { name: '传统 CAPTCHA (图片、文字、音频)', desc: '基本的扭曲字符識別、九宮格圖片選擇等二代交互驗證。', power: 'Medium', difficulty: 'Low' },
-      { name: '滑块、拖拽、拼图验证', desc: '要求拖動拼圖塊對齊缺口，後端同步驗證拖拽的曲率與速度抖動。', power: 'High', difficulty: 'Medium' },
-      { name: 'Proof of Work (客户端算力证明)', desc: '在背景要求瀏覽器執行 SHA-256 等難度哈希計算，增加自動化刷量成本。', power: 'Maximum', difficulty: 'High' },
-      { name: '语义验证 (图像选择、文字理解)', desc: '例如「請選出所有含有交通號誌的圖片」或進行邏輯問答。', power: 'High', difficulty: 'Medium' },
-      { name: '游戏化验证', desc: '融入趣味微小遊戲（如旋轉物品角度、接水管）以增加機器人破解難度。', power: 'High', difficulty: 'High' },
-      { name: '动态难度挑战 (根据风险调整)', desc: '基於 IP 與行為信譽分，動態將挑戰從無感調整為算力計算或滑塊。', power: 'Maximum', difficulty: 'High' },
-      { name: '行为连续性挑战', desc: '要求用戶連續完成一連串特定手勢（如畫圈、雙擊）方可通過網關。', power: 'High', difficulty: 'Medium' }
+      { name: 'Legacy Visual CAPTCHAs', desc: 'Verify distorted text grids or object selection panels (2nd-gen security).', power: 'Medium', difficulty: 'Low' },
+      { name: 'Slider Puzzles and Alignment Quizzes', desc: 'Validate visual alignments while scoring cursor velocity variance and friction trajectory.', power: 'High', difficulty: 'Medium' },
+      { name: 'Proof-of-Work (Client Computational Puzzle)', desc: 'Force background client threads to compute high-difficulty SHA-256 puzzles to slow down scrapers.', power: 'Maximum', difficulty: 'High' },
+      { name: 'Semantic Understanding Questions', desc: 'Challenge users with spatial logic queries or visual categorizations.', power: 'High', difficulty: 'Medium' },
+      { name: 'Gamified Captchas', desc: 'Incorporate mini-games (e.g. rotating 3D models upright) to increase bot bypass costs.', power: 'High', difficulty: 'High' },
+      { name: 'Adaptive Mitigation Scaling', desc: 'Scale verification difficulty dynamically from silent passes to 3D challenges based on client reputation.', power: 'Maximum', difficulty: 'High' },
+      { name: 'Action Sequence Challenges', desc: 'Require users to trace custom visual paths or gesture double-clicks to unlock pathways.', power: 'High', difficulty: 'Medium' }
     ]
   },
   {
     id: 'network',
-    title: '5. 网络与代理检测类 (Network & Proxy)',
-    description: '在傳輸層與網絡層識別代理中轉、住宅 IP 租用及匿名路由。',
+    title: '5. Network & Proxy Identifications',
+    description: 'Audit transport layer IP blocks, routing paths, and residential proxy networks.',
     methods: [
-      { name: 'IP 信誉库 + 数据中心 IP 检测', desc: '實時比對全球主機商 ASN 號段，過濾來自 AWS、阿里雲等機房的流量。', power: 'High', difficulty: 'Low' },
-      { name: '代理协议指纹 (SOCKS5/VLESS/gRPC)', desc: '分析 TCP 連接指紋，識別客戶端是否使用特定的代理通訊協定。', power: 'Maximum', difficulty: 'Medium' },
-      { name: 'VPN / 住宅代理检测', desc: '計算 TCP 延遲（RTT）與地理位置的偏差，揪出中轉的住宅 IP 爬蟲。', power: 'High', difficulty: 'High' },
-      { name: 'Tor 出口节点检测', desc: '實時同步洋蔥路由（Tor）出口節點名單，自動對隱私代理實施降級攔截。', power: 'Maximum', difficulty: 'Low' },
-      { name: 'ASN 行为分析', desc: '監控特定自主系統（ASN）號段下的並發異常，防止分佈式刷量。', power: 'High', difficulty: 'Medium' },
-      { name: '请求来源一致性 (IP+地理+行为)', desc: '驗證 IP 所在地、系統語系、時區與本地網絡延遲是否具備物理合理性。', power: 'High', difficulty: 'Medium' }
+      { name: 'IP Reputation Database Check', desc: 'Match client subnets against public server, VPS, and cloud hosting ASN nodes (e.g. AWS, DigitalOcean).', power: 'High', difficulty: 'Low' },
+      { name: 'Proxy Protocol Fingerprinting', desc: 'Inspect TCP flags to identify intermediate routing via VLESS, SOCKS5, or gRPC proxies.', power: 'Maximum', difficulty: 'Medium' },
+      { name: 'VPN and Residential Proxy Tracing', desc: 'Measure TCP round-trip delay (RTT) vs geographic distances to flag residential proxy proxies.', power: 'High', difficulty: 'High' },
+      { name: 'Tor Exit Node Verification', desc: 'Compare incoming IPs against real-time Tor directory consensus lists to flag Onion network sessions.', power: 'Maximum', difficulty: 'Low' },
+      { name: 'ASN Subnet Anomalies & Spikes', desc: 'Monitor concurrent spikes from specific ISP ASN ranges to stop distributed network scans.', power: 'High', difficulty: 'Medium' },
+      { name: 'Physical Consistency (IP vs Locale)', desc: 'Validate consistency between client IP location, system language, clock, and networking lag.', power: 'High', difficulty: 'Medium' }
     ]
   },
   {
     id: 'semantic',
-    title: '6. 内容与语义分析类 (Content & Semantics)',
-    description: '審查提交文本與內容特徵，過濾大模型生成的垃圾內容或自動化黏貼。',
+    title: '6. Content & Semantics Auditing',
+    description: 'Inspect inputs to stop programmatic spamming or machine generated text.',
     methods: [
-      { name: '大模型生成内容 (LLM) 判别', desc: '分析文本的字詞機率分佈特徵，判斷是否為 GPT-4/LLM 批量洗稿內容。', power: 'High', difficulty: 'High' },
-      { name: '重复内容 / 模板内容检测', desc: '比對全網歷史提交庫，攔截僅修改模板參數的自動化洗評論行為。', power: 'Medium', difficulty: 'Low' },
-      { name: '语义连贯性与逻辑性分析', desc: '識別隨機拼湊的無意義單詞與SEO關鍵字堆砌爬蟲。', power: 'High', difficulty: 'High' },
-      { name: '链接与图片使用模式', desc: '監控輸入內容中超連結、引用的比例，預防論壇群發廣告 Bot。', power: 'Medium', difficulty: 'Low' },
-      { name: '复制粘贴后的行为链检测', desc: '判定「黏貼文本 -> 提交表單」的時間差是否低於 350ms，捕捉無人工審查的提交。', power: 'High', difficulty: 'Low' }
+      { name: 'LLM Generated Content Classification', desc: 'Evaluate word probability distributions to catch bulk text generated by GPT architectures.', power: 'High', difficulty: 'High' },
+      { name: 'Duplicate & Template String Matching', desc: 'Cross-check inputs with historical databases to filter automated review bots.', power: 'Medium', difficulty: 'Low' },
+      { name: 'Semantic Coherence Inspections', desc: 'Detect random character strings or automated keyword stuffing.', power: 'High', difficulty: 'High' },
+      { name: 'Hyperlink & Image Usage Ratios', desc: 'Monitor hyperlink percentages in message bodies to prevent forum spamming.', power: 'Medium', difficulty: 'Low' },
+      { name: 'Paste & Immediate Submission Analysis', desc: 'Flag events where paste and submit clicks occur in under 350ms, pointing to headless macros.', power: 'High', difficulty: 'Low' }
     ]
   },
   {
     id: 'reputation',
-    title: '7. 声誉与历史类 (Reputation & History)',
-    description: '建立長期信任帳本，在確保安全的同時讓良性用戶享有最流暢的體驗。',
+    title: '7. Reputation & Historical Ledger',
+    description: 'Maintain historic trust scoring for return users to guarantee friction-free speeds.',
     methods: [
-      { name: '设备历史可信评分', desc: '為通過多次強檢驗的瀏覽器註冊安全憑證，後續交互直接放行。', power: 'High', difficulty: 'Medium' },
-      { name: 'IP/账号行为历史', desc: '累計特定 IP 或帳號在網關的驗證成功率，調降良性 IP 的挑戰概率。', power: 'High', difficulty: 'Medium' },
-      { name: '跨平台行为一致性', desc: '在同一個網絡聯盟內，共用客戶端特徵以加速未知威脅判斷。', power: 'High', difficulty: 'High' },
-      { name: '新设备/新 IP 的严格验证', desc: '對首次訪問的設備、高風險網段 IP 進行嚴格的一階段靜默遙測。', power: 'Medium', difficulty: 'Low' },
-      { name: '黑白名单 + 关联图谱', desc: '追蹤 IP、Cookie、設備指紋間的網狀關聯，對協同作案的設備進行批量拉黑。', power: 'Maximum', difficulty: 'High' }
+      { name: 'Device Fingerprint History Scoring', desc: 'Generate encrypted browser cookie tokens to bypass checks for recognized devices.', power: 'High', difficulty: 'Medium' },
+      { name: 'IP / Account Trust Scoring', desc: 'Track historical pass rates for clients to decrease challenge triggers over time.', power: 'High', difficulty: 'Medium' },
+      { name: 'Cross-Domain Security Network Ledger', desc: 'Share threat indicators across a federated network of domains for early detection.', power: 'High', difficulty: 'High' },
+      { name: 'New Device / Untracked IP Gating', desc: 'Route newly detected browser configurations through invisible telemetry evaluations.', power: 'Medium', difficulty: 'Low' },
+      { name: 'IP Association Network Analysis', desc: 'Analyze relationship graphs between IPs, user IDs, and device cookies to blacklist bot rings.', power: 'Maximum', difficulty: 'High' }
     ]
   },
   {
     id: 'ml',
-    title: '8. 机器学习与高级分析类 (Machine Learning)',
-    description: '使用統計與 AI 推理模型，對未知威脅進行主動分類與預測。',
+    title: '8. Machine Learning Models',
+    description: 'Train classification models to proactively flag emerging threat vectors.',
     methods: [
-      { name: '异常检测模型 (Isolation Forest/Autoencoder)', desc: '訓練無監督學習模型，在不需要特定特徵的情況下識別變異的機器人。', power: 'High', difficulty: 'High' },
-      { name: '行为聚类与分类模型', desc: '將鼠標運動軌跡轉化為特徵向量，分類判斷是否符合已知 Selenium 指紋。', power: 'High', difficulty: 'High' },
-      { name: '对抗样本检测', desc: '識別惡意仿造人類生理雜訊的對抗性軌跡，防範二代人機對抗。', power: 'Maximum', difficulty: 'High' },
-      { name: '实时在线学习 (Online Learning)', desc: '在邊緣節點實時訓練輕量級神經網絡，自適應適應新爆發的爬蟲特徵。', power: 'Maximum', difficulty: 'High' },
-      { name: '多模型集成 + 投票机制', desc: '運行規則引擎、孤立森林、指紋匹配等多維度子模型，綜合投票決策。', power: 'High', difficulty: 'High' },
-      { name: '攻击样本库自动更新规则', desc: '被阻斷的異常流量封包自動提取特徵，自動重新生成網關篩選黑名單。', power: 'Maximum', difficulty: 'High' }
+      { name: 'Anomaly Models (Isolation Forest)', desc: 'Train unsupervised neural nets to catch zero-day bot mutations without hardcoded rules.', power: 'High', difficulty: 'High' },
+      { name: 'Kinetic Classification Algorithms', desc: 'Convert cursor movements into vector matrices to classify bot trajectories.', power: 'High', difficulty: 'High' },
+      { name: 'Adversarial Example Detectors', desc: 'Recognize bots simulating human tremors and organic noise patterns.', power: 'Maximum', difficulty: 'High' },
+      { name: 'Real-time Online Edge Retraining', desc: 'Re-train neural weight parameters on edge nodes to adapt to local scraping spikes.', power: 'Maximum', difficulty: 'High' },
+      { name: 'Ensemble Model Voting Systems', desc: 'Combine rule matches, Isolation Forests, and device checks to compute final threat scores.', power: 'High', difficulty: 'High' },
+      { name: 'Self-Updating Signature Rules', desc: 'Feed blocked payloads back into rule generation loops to automatically compile WAF rules.', power: 'Maximum', difficulty: 'High' }
     ]
   },
   {
     id: 'honeypot',
-    title: '9. 蜜罐与陷阱类 (Honeypot & Traps)',
-    description: '向網頁注入專門引誘自動化爬蟲的陷阱，實施主動防禦。',
+    title: '9. Honeypots & Traps',
+    description: 'Inject client traps to capture automated scripts scanning DOM layouts.',
     methods: [
-      { name: '隐藏表单字段 (Honeypot)', desc: '在 HTML 中加入隨機名稱且 CSS 隱藏的輸入框，Bot 自動填入即暴露。', power: 'Maximum', difficulty: 'Low' },
-      { name: '隐藏链接 / 隐藏按钮', desc: '佈置隱蔽的超連結或提交按鈕，自動化蜘蛛程序解析並請求時直接封鎖。', power: 'Maximum', difficulty: 'Low' },
-      { name: '陷阱 API 接口', desc: '在網頁代碼註釋或隱蔽腳本中宣告偽造的敏感接口，收集惡意掃描源。', power: 'High', difficulty: 'Medium' },
-      { name: 'CSS 隐藏输入框', desc: '動態改變隱藏輸入框的位置，防止腳本爬蟲通過坐標檢測跳過。', power: 'Medium', difficulty: 'Low' },
-      { name: '虚假错误提示', desc: '向疑似客戶端發送假錯誤，觀察自動化工具是否會繞過瀏覽器正常邏輯提交。', power: 'High', difficulty: 'Medium' }
+      { name: 'Hidden Input Fields (Honeypot)', desc: 'Insert CSS-hidden inputs into forms; bots completing these inputs expose themselves instantly.', power: 'Maximum', difficulty: 'Low' },
+      { name: 'Hidden Anchor Tags / Links', desc: 'Place invisible links on pages; scrapers requesting these targets are blacklisted.', power: 'Maximum', difficulty: 'Low' },
+      { name: 'Deceptive API Handlers', desc: 'Expose fake private API routes in scripts to capture rogue endpoint scanning.', power: 'High', difficulty: 'Medium' },
+      { name: 'Dynamic Position Field Shuffling', desc: 'Dynamically shuffle hidden field names and coordinates to bypass script checks.', power: 'Medium', difficulty: 'Low' },
+      { name: 'Deceptive Frontend Errors', desc: 'Inject false JS runtime exceptions to analyze if clients ignore browser warnings.', power: 'High', difficulty: 'Medium' }
     ]
   },
   {
     id: 'protocol',
-    title: '10. 请求与协议分析类 (Request & Protocol)',
-    description: '在傳輸層剖析 TCP/IP 數據包參數，保障請求協議一致性。',
+    title: '10. Network Protocol Validation',
+    description: 'Audit network layer data structures to guarantee client integrity.',
     methods: [
-      { name: '请求头完整性与顺序', desc: '核對客戶端發送的 Header 排序是否與其 User-Agent 聲明的瀏覽器 100% 吻合。', power: 'High', difficulty: 'Medium' },
-      { name: '请求频率模式 (Leaky Bucket)', desc: '實施滾動窗口流控，精準計算單一 IP 對特定 API 的高頻微爆發。', power: 'High', difficulty: 'Low' },
-      { name: 'Cookie / Storage 行为一致性', desc: '校驗客戶端 Cookie 的生命週期與 LocalStorage 變量的持久化讀寫。', power: 'Medium', difficulty: 'Low' },
-      { name: 'Referer 与来源匹配', desc: '檢查 Referer 鏈路與 Origin 頭部的跳轉邏輯，預防 CSRF 與跨域群發。', power: 'Medium', difficulty: 'Low' },
-      { name: '请求体结构异常检测', desc: '對 POST Payload 進行 JSON 鍵值排序與非標字符分析。', power: 'High', difficulty: 'Medium' }
+      { name: 'Request Header Integrity checks', desc: 'Cross-check incoming HTTP header names and casing order with client User-Agent standards.', power: 'High', difficulty: 'Medium' },
+      { name: 'Leaky Bucket API Rate Limiting', desc: 'Deploy rolling-window algorithms to throttle query bursts targeting REST paths.', power: 'High', difficulty: 'Low' },
+      { name: 'Cookie & Storage Expiry Check', desc: 'Verify cookie lifetimes and client storage variables to catch script restarts.', power: 'Medium', difficulty: 'Low' },
+      { name: 'Referer Chain & Origin Matching', desc: 'Audit HTTP Referer paths and Origin routes to prevent automated cross-site requests.', power: 'Medium', difficulty: 'Low' },
+      { name: 'Payload Structural Casing Check', desc: 'Inspect request body formats for anomalous non-standard characters.', power: 'High', difficulty: 'Medium' }
     ]
   },
   {
     id: 'other',
-    title: '11. 其他已知方法 (Other Advanced)',
-    description: '業界最新防禦標準、Attestation 硬體驗證與瀏覽器底層 API 保護。',
+    title: '11. Other Advanced Defense Systems',
+    description: 'Adopt next-generation industry standards and hardware-level web verification tools.',
     methods: [
-      { name: '浏览器完整性检查 (Browser Integrity API)', desc: '調用 Chrome / Safari 的硬體安全證明 API，核實瀏覽器二進制文件未被修改。', power: 'High', difficulty: 'High' },
-      { name: 'JavaScript 环境完整性检测', desc: '檢測 Object.prototype 等原生構造函數是否被 Proxy 代理重寫。', power: 'High', difficulty: 'High' },
-      { name: '内存占用与性能指纹', desc: '檢測 JS 執行過程中的垃圾回收頻率與物理內存佔用抖動。', power: 'Medium', difficulty: 'High' },
-      { name: 'CSS 动画行为分析', desc: '利用 requestAnimationFrame 校驗 CSS 動畫在可見視窗內的物理執行時長。', power: 'Medium', difficulty: 'Medium' },
-      { name: 'SVG 渲染差异', desc: '繪製複雜 SVG 二維圖形，採集不同 OS 渲染引擎產生的細微像素偏差。', power: 'High', difficulty: 'Medium' },
-      { name: 'Private Click Measurement 滥用检测', desc: '防範廣告歸因 API 被腳本機器人大量模擬點擊刷量。', power: 'Medium', difficulty: 'High' },
-      { name: 'Federated Learning 信号 (联邦学习)', desc: '去中心化地聚合多端威脅模型，在不洩漏用戶隱私的前提下優化網關。', power: 'High', difficulty: 'High' },
-      { name: '硬件安全密钥 (WebAuthn)', desc: '對高敏感度表單，調用物理 FaceID/TouchID 或 FIDO 安全鑰匙驗證。', power: 'Maximum', difficulty: 'High' }
+      { name: 'Browser Attestation APIs', desc: 'Invoke hardware-level client device integrity checks (e.g. Apple Private Access Tokens).', power: 'High', difficulty: 'High' },
+      { name: 'JS Sandbox & Scope Protection', desc: 'Verify if native JS functions or object prototypes have been modified by proxy scripts.', power: 'High', difficulty: 'High' },
+      { name: 'Memory Footprint Analysis', desc: 'Track RAM metrics and Garbage Collection trends to isolate automation engines.', power: 'Medium', difficulty: 'High' },
+      { name: 'CSS Frame Rate & Animation Audits', desc: 'Measure requestAnimationFrame timings to verify if CSS rendering matches display hardware.', power: 'Medium', difficulty: 'Medium' },
+      { name: 'SVG Rendering Deviations', desc: 'Draw test SVG shapes to map hardware rendering and GPU font layout anomalies.', power: 'High', difficulty: 'Medium' },
+      { name: 'Private Click Measurement Checks', desc: 'Block bots mimicking clicks on ad attribution frameworks.', power: 'Medium', difficulty: 'High' },
+      { name: 'Privacy-Preserving Federated Learning', desc: 'Compute threat intelligence parameters decentralized across nodes.', power: 'High', difficulty: 'High' },
+      { name: 'WebAuthn Hardware Tokens', desc: 'Route high-threat transactions through visual FaceID/TouchID or FIDO hardware keys.', power: 'Maximum', difficulty: 'High' }
     ]
   },
   {
     id: 'vitashield',
-    title: '🛡️ VitaShield 独家原创黑科技 (Proprietary Innovations)',
-    description: 'VitaShield 不只是整合業界技術，更自行研發多項專屬檢測演算法，這些技術目前在市面上極少見或尚未被廣泛應用，是我們的核心競爭力。',
+    title: '🛡️ VitaShield Proprietary Heuristics',
+    description: 'Our proprietary algorithms designed specifically to counter advanced human-mimicking AI Agents and bot automation scripts.',
     methods: [
-      { name: '专利微抖动与生理噪声注入检测', desc: 'Sub-pixel Jitter Bio-noise Mapping：透過分析滑鼠和點擊行為中的亞像素級微抖動與人類生理雜訊，精準識別高度模擬的自動化腳本。即使 Bot 能模擬軌跡，也難以還原真人操作時自然產生的細微生理波動。', power: 'Maximum', difficulty: 'Medium' },
-      { name: '减速「犹豫-确认」停顿窗口判定', desc: 'Deceleration Hesitation Window Detection：偵測人類在執行重要操作前常出現的「減速 → 短暫停頓 → 確認」行為模式。Bot 通常缺乏這種自然的決策猶豫窗口。', power: 'Maximum', difficulty: 'Medium' },
-      { name: '多标签页关联行为追踪', desc: 'Multi-tab Cross-session Tracing：跨標籤頁追蹤用戶的真實操作流程，分析用戶是否在多個頁面間自然切換與互動。高度自動化的 Bot 難以維持多標籤頁間的邏輯一致性。', power: 'High', difficulty: 'High' },
-      { name: '错误修正与退格信任加权机制', desc: 'Backspace Correction Trust Weighting：將用戶輸入過程中的錯誤修正頻率與模式納入信任評分。真人輸入時通常會出現自然修正行為，而大多數 Bot 則極少犯錯或進行修正。', power: 'Medium', difficulty: 'Low' },
-      { name: '智慧思考时间动态建模', desc: 'Adaptive Thinking Duration Modeling：根據操作複雜度動態計算合理的「思考時間」區間。能有效識別 those在複雜操作中表現出異常快速決策的自動化行為。', power: 'High', difficulty: 'High' },
-      { name: '语义与输入速度一致性检测', desc: 'Semantic-Input Velocity Consistency Engine：分析輸入內容的語義複雜度與實際輸入速度的匹配程度。快速輸入高複雜度或 AI 生成內容的行為會被標記為高風險。', power: 'High', difficulty: 'High' },
-      { name: '渐进式设备信任累积系统', desc: 'Progressive Device Trust Accumulation：新設備或新 IP 必須透過持續的正常行為逐步累積信任分數，而非一次性給予高信任度，有效防範新註冊帳號濫用。', power: 'High', difficulty: 'Medium' },
-      { name: '攻击样本反馈自学习引擎', desc: 'Adversarial Sample Feedback Loop：將被攔截的機器人行為樣本自動回饋至風險引擎，持續優化檢測規則與模型，形成自我進化的防禦系統。', power: 'Maximum', difficulty: 'High' },
-      { name: '微互动压力测试机制', desc: 'Micro-interaction Stress Testing：在風險較高時，隨機要求用戶執行一個極小的自然互動（如輕微滑動或短暫懸停），進一步驗證行為真實性，對高級 Bot 造成極大困擾。', power: 'Maximum', difficulty: 'Medium' },
-      { name: '剪贴簿后置行为链分析', desc: 'Clipboard Post-action Behavior Chain：分析用戶複製貼上後的後續行為（是否會修改、思考或直接提交）。真人通常會對貼上的內容進行調整，而 Bot 多為直接提交。', power: 'High', difficulty: 'Low' },
-      { name: '焦点流动熵值分析', desc: 'Focus Flow Entropy Analysis：計算用戶在頁面內的焦點切換順序與隨機性。真人瀏覽行為具有較高的資訊熵，而自動化腳本的焦點移動通常過於規律。', power: 'High', difficulty: 'Medium' },
-      { name: '操作时序节律异常检测', desc: 'Temporal Rhythm Anomaly Detection：結合用戶歷史操作時段與當前行為的時間節律，檢測異常時段的高風險操作（例如凌晨異常高頻互動）。', power: 'Medium', difficulty: 'Medium' },
-      { name: '混合概率-行为融合评分引擎', desc: 'Hybrid Probabilistic-Behavioral Fusion Engine：將傳統規則引擎與概率模型進行深度融合，同時考量行為特徵與統計異常，輸出更精準的多維度風險評分。', power: 'Maximum', difficulty: 'High' }
+      { name: 'Sub-pixel Jitter Bio-noise Mapping', desc: 'Analyze cursor streams for sub-pixel physiological tremors. Script paths lack these micro-vibrations.', power: 'Maximum', difficulty: 'Medium' },
+      { name: 'Deceleration Hesitation Window Detection', desc: 'Track cursor velocity changes before clicks. Bots lack organic cognitive hesitation intervals.', power: 'Maximum', difficulty: 'Medium' },
+      { name: 'Multi-tab Cross-session Tracking', desc: 'Correlate navigation flows across browser tabs to capture multi-tab scraping bots.', power: 'High', difficulty: 'High' },
+      { name: 'Backspace & Keystroke Typo Analysis', desc: 'Reward natural spelling typos and backspace edits. Bots produce error-free keyboard cadences.', power: 'Medium', difficulty: 'Low' },
+      { name: 'Adaptive Thinking Duration Modeling', desc: 'Calculate cognitive delays depending on input complexity to slow down rapid API submissions.', power: 'High', difficulty: 'High' },
+      { name: 'Semantic-Input Velocity Consistency Engine', desc: 'Measure the complexity of text relative to client input speeds to flag instant LLM copy-pastes.', power: 'High', difficulty: 'High' },
+      { name: 'Progressive Device Trust Accumulation', desc: 'Require newly registered devices to compile trust logs over time rather than granting instant passes.', power: 'High', difficulty: 'Medium' },
+      { name: 'Adversarial Sample Feedback Loop', desc: 'Automatically retrain risk networks using captured bot payloads to evolve WAF policies.', power: 'Maximum', difficulty: 'High' },
+      { name: 'Micro-interaction Stress Testing', desc: 'Inject subtle hover or slide challenges on high-risk routes to verify manual kinetics.', power: 'Maximum', difficulty: 'Medium' },
+      { name: 'Clipboard Post-action Behavior Chain', desc: 'Evaluate user actions post-pasting (e.g. edits, readings) to differentiate humans from clipboard scripts.', power: 'High', difficulty: 'Low' },
+      { name: 'Focus Flow Entropy Analysis', desc: 'Calculate the mathematical entropy of navigation flow. Human interaction yields high entropy.', power: 'High', difficulty: 'Medium' },
+      { name: 'Temporal Rhythm Anomaly Detection', desc: 'Cross-check action timestamps with local timezones to catch automated off-hour traffic.', power: 'Medium', difficulty: 'Medium' },
+      { name: 'Hybrid Probabilistic-Behavioral Fusion Engine', desc: 'Fuse classic rule decisions with machine learning confidence scores to yield dynamic risk verdicts.', power: 'Maximum', difficulty: 'High' }
     ]
   }
-];
-
-export const SystemSpecs: React.FC = () => {
+];export const SystemSpecs: React.FC = () => {
   const [activeSpecTab, setActiveSpecTab] = useState<'blueprint' | 'supabase' | 'api' | 'matrix'>('blueprint');
   const [activeMatrixCategory, setActiveMatrixCategory] = useState<string>('behavioral');
 
@@ -278,15 +276,15 @@ export const SystemSpecs: React.FC = () => {
               </div>
             </div>
 
-            {/* Compliance Block */}
+                        {/* Compliance Block */}
             <div style={styles.compliancePanel}>
               <div style={{ ...styles.blueprintHeader, color: 'var(--success)' }}>
                 <span style={styles.blueprintNum}>05</span>
-                <h4>Compliance & Privacy Specs (合规要求)</h4>
+                <h4>Compliance & Privacy Specs</h4>
               </div>
               <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
-                VitaShield 嚴格遵循全球最嚴格私隱法規，包括 <strong>GDPR (歐洲)</strong> 與 <strong>PDPA (馬來西亞)</strong>。
-                系統採用「無 PII（個人識別資訊）」設計：動態 IP 地址在寫入數據庫前進行單向 Salted Hash 加密，且生物識別特徵僅於客戶端經由 Client SDK telemetries 生成哈希值比對，<strong>絕不上傳或保存任何用戶的原始人臉圖像或語音數據</strong>，保障最高規格的隱私合規性，同時滿足 <strong>SOC2</strong> 安全稽核要求。
+                VitaShield strictly complies with global data privacy frameworks including <strong>GDPR (Europe)</strong> and <strong>PDPA (Malaysia)</strong>.
+                The system is engineered with a Zero-PII architecture: dynamic IP addresses are cryptographically hashed (one-way salted hashes) prior to ingestion. Biometric heuristics are evaluated entirely on the client-side inside our sandboxed SDK, <strong>never uploading or saving raw facial images or voice cadences to our servers</strong>. This ensures compliance with enterprise security requirements, aligning with <strong>SOC2 Type II</strong> auditing standards.
               </p>
             </div>
 
@@ -468,9 +466,9 @@ Content-Type: application/json`}
         {/* Tab 4: Defense Methods Matrix */}
         {activeSpecTab === 'matrix' && (
           <div style={styles.specBody}>
-            <h2 style={styles.specHeaderTitle}>人机校验算法与防御方法矩阵 (Defense Methods Matrix)</h2>
+            <h2 style={styles.specHeaderTitle}>Defense Methods Matrix</h2>
             <p style={styles.specDesc}>
-              VitaShield 汇集了全球安全行业已知的所有常规防范机制、偏门检测维度，以及我们原创设计的专属 kinetics 生理特征防御算法。
+              VitaShield aggregates all industry-standard verification mechanisms alongside our proprietary biological kinetics behavioral checks.
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr', gap: '2rem', marginTop: '1.5rem', alignItems: 'start' }}>

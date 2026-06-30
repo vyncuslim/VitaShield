@@ -1,13 +1,71 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { ShieldConfig, VerificationLog } from '../types';
 
 interface DashboardProps {
   config: ShieldConfig;
   logs: VerificationLog[];
+  onAddLog?: (
+    method: VerificationLog['method'],
+    status: VerificationLog['status'],
+    score: number,
+    flags?: string[],
+    deviceAnomalies?: string[]
+  ) => void;
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ config, logs }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ config, logs, onAddLog }) => {
   const [hoveredPoint, setHoveredPoint] = useState<{ day: string; human: number; bot: number; index: number } | null>(null);
+
+  const [isSimulating, setIsSimulating] = useState(false);
+  const [simSpeed, setSimSpeed] = useState<number>(2000);
+  const [trafficProfile, setTrafficProfile] = useState<'balanced' | 'bots' | 'humans'>('balanced');
+
+  useEffect(() => {
+    if (!isSimulating || !onAddLog) return;
+
+    const interval = setInterval(() => {
+      let status: VerificationLog['status'] = 'passed';
+      const rand = Math.random();
+
+      if (trafficProfile === 'balanced') {
+        if (rand < 0.25) status = 'blocked';
+        else if (rand < 0.40) status = 'flagged';
+      } else if (trafficProfile === 'bots') {
+        if (rand < 0.80) status = 'blocked';
+        else if (rand < 0.95) status = 'flagged';
+      } else if (trafficProfile === 'humans') {
+        if (rand < 0.02) status = 'blocked';
+        else if (rand < 0.10) status = 'flagged';
+      }
+
+      let method: VerificationLog['method'] = 'behavioral_telemetry';
+      let score = 5;
+      let flags: string[] = [];
+      let anomalies: string[] = [];
+
+      if (status === 'passed') {
+        method = Math.random() < 0.8 ? 'behavioral_telemetry' : 'biometric_scan';
+        score = Math.floor(Math.random() * 15);
+      } else if (status === 'flagged') {
+        method = Math.random() < 0.6 ? 'captcha_3d' : 'behavioral_telemetry';
+        score = 35 + Math.floor(Math.random() * 30);
+        const allFlags = ['suspicious_mouse_micro_tremors', 'click_no_deceleration_pause', 'keystroke_flight_time_anomalous'];
+        flags = allFlags.filter(() => Math.random() < 0.6);
+      } else {
+        const methods: Array<VerificationLog['method']> = ['cryptographic_pow', 'behavioral_telemetry', 'captcha_3d'];
+        method = methods[Math.floor(Math.random() * 3)];
+        score = 85 + Math.floor(Math.random() * 15);
+        const allFlags = ['perfectly_straight_mouse_trajectory', 'bot_paste_submit_abuse', 'sub_500ms_form_submission_speed'];
+        flags = allFlags.filter(() => Math.random() < 0.6);
+        const allAnomalies = ['navigator_webdriver_active', 'headless_screen_dimensions_zeroed', 'virtualized_gpu_environment'];
+        anomalies = allAnomalies.filter(() => Math.random() < 0.6);
+      }
+
+      onAddLog(method, status, score, flags, anomalies);
+    }, simSpeed);
+
+    return () => clearInterval(interval);
+  }, [isSimulating, simSpeed, trafficProfile, onAddLog]);
 
   // Calculate live stats dynamically based on logs
   const total = logs.length;
@@ -156,7 +214,99 @@ export const Dashboard: React.FC<DashboardProps> = ({ config, logs }) => {
           </div>
           <div style={styles.threatBadge}>
             <span style={styles.threatPulse} />
-            <span>Threat Level: <strong style={{ color: 'var(--success)' }}>NORMAL</strong></span>
+            <span>Threat Level: <strong style={{ color: isSimulating && trafficProfile === 'bots' ? 'var(--danger)' : 'var(--success)' }}>{isSimulating && trafficProfile === 'bots' ? 'ATTACK INDICATION' : 'NORMAL'}</strong></span>
+          </div>
+        </div>
+      </div>
+
+      {/* Live Gateway Simulator Control Card */}
+      <div className="glass-panel" style={styles.simulatorPanel}>
+        <div style={styles.simulatorHeader}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <span style={{
+              width: '10px',
+              height: '10px',
+              borderRadius: '50%',
+              background: isSimulating ? 'var(--secondary)' : 'var(--text-dark)',
+              boxShadow: isSimulating ? '0 0 10px var(--secondary)' : 'none',
+              animation: isSimulating ? 'pulse 1.5s infinite' : 'none'
+            }} />
+            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: '700', color: '#fff' }}>
+              Edge Gateway Live Traffic Simulator
+            </h3>
+          </div>
+          <button
+            onClick={() => setIsSimulating(!isSimulating)}
+            className="btn"
+            style={{
+              padding: '0.4rem 1rem',
+              borderRadius: '8px',
+              fontSize: '0.82rem',
+              fontWeight: '700',
+              cursor: 'pointer',
+              background: isSimulating ? 'rgba(239, 68, 68, 0.15)' : 'rgba(6, 182, 212, 0.15)',
+              border: isSimulating ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid rgba(6, 182, 212, 0.4)',
+              color: isSimulating ? 'var(--danger)' : 'var(--secondary)',
+              transition: 'all 0.3s'
+            }}
+          >
+            {isSimulating ? 'Stop Simulator' : 'Start Simulation Feed'}
+          </button>
+        </div>
+        <p style={{ margin: '0.5rem 0 1rem 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+          Inject live, randomized human/bot traffic patterns to observe real-time updates across charts, thresholds, threat filters, and ledger telemetry.
+        </p>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 2fr', gap: '1.5rem', alignItems: 'center' }}>
+          <div>
+            <label style={styles.simLabel}>Traffic Profile</label>
+            <select
+              value={trafficProfile}
+              onChange={(e) => setTrafficProfile(e.target.value as any)}
+              disabled={!isSimulating}
+              style={styles.simSelect}
+            >
+              <option value="balanced">Balanced (Normal Mix)</option>
+              <option value="humans">Mostly Human Traffic</option>
+              <option value="bots">Coordinated Bot Attack</option>
+            </select>
+          </div>
+          <div>
+            <label style={styles.simLabel}>Simulation Speed</label>
+            <select
+              value={simSpeed}
+              onChange={(e) => setSimSpeed(Number(e.target.value))}
+              disabled={!isSimulating}
+              style={styles.simSelect}
+            >
+              <option value={4000}>Slow (Every 4s)</option>
+              <option value={2000}>Normal (Every 2s)</option>
+              <option value={800}>Fast (Every 0.8s)</option>
+            </select>
+          </div>
+          <div>
+            <label style={styles.simLabel}>Live Activity Feed (Incoming Requests)</label>
+            <div style={styles.simFeedConsole}>
+              {logs.slice(0, 3).map((log) => (
+                <div key={log.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.74rem', borderBottom: '1px solid rgba(255,255,255,0.03)', paddingBottom: '3px' }}>
+                  <span style={{
+                    color: log.status === 'passed' ? 'var(--success)' : log.status === 'flagged' ? 'var(--warning)' : 'var(--danger)',
+                    fontWeight: '700',
+                    fontFamily: 'var(--font-mono)'
+                  }}>
+                    [{log.status.toUpperCase()}]
+                  </span>
+                  <span style={{ color: '#fff', opacity: 0.85, textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap', maxWidth: '140px' }}>{log.location}</span>
+                  <span style={{ color: 'var(--text-muted)' }}>{log.device}</span>
+                  <span style={{ color: log.riskScore > 75 ? 'var(--danger)' : 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>Score: {log.riskScore}</span>
+                </div>
+              ))}
+              {logs.length === 0 && (
+                <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', fontStyle: 'italic', textAlign: 'center', paddingTop: '5px' }}>
+                  Gateway idle. Enable the simulator to view live traffic.
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -637,5 +787,52 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: '0.76rem',
     lineHeight: '1.4',
     color: 'var(--text-muted)'
+  },
+  simulatorPanel: {
+    padding: '1.5rem',
+    background: 'rgba(10, 15, 30, 0.45)',
+    border: '1px solid rgba(6, 182, 212, 0.1)',
+    borderRadius: '12px',
+    boxShadow: '0 4px 30px rgba(0, 0, 0, 0.3)',
+    backdropFilter: 'blur(8px)',
+  },
+  simulatorHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+    paddingBottom: '0.75rem',
+    marginBottom: '0.75rem'
+  },
+  simLabel: {
+    display: 'block',
+    fontSize: '0.75rem',
+    color: 'var(--text-muted)',
+    marginBottom: '0.25rem',
+    fontWeight: '600'
+  },
+  simSelect: {
+    width: '100%',
+    background: 'rgba(5, 7, 12, 0.85)',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    padding: '0.45rem 0.75rem',
+    borderRadius: '8px',
+    color: '#fff',
+    fontSize: '0.8rem',
+    cursor: 'pointer',
+    outline: 'none',
+    transition: 'border-color 0.3s'
+  },
+  simFeedConsole: {
+    background: 'rgba(5, 7, 12, 0.95)',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    borderRadius: '8px',
+    padding: '0.5rem 0.75rem',
+    height: '62px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+    overflowY: 'hidden',
+    fontFamily: 'var(--font-mono)'
   }
 };

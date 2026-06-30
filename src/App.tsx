@@ -222,7 +222,9 @@ function App() {
   const handleAddLog = (
     method: VerificationLog['method'],
     status: VerificationLog['status'],
-    score: number
+    score: number,
+    flags?: string[],
+    deviceAnomalies?: string[]
   ) => {
     const randomHex = (len: number) => Array.from({length: len}, () => Math.floor(Math.random()*16).toString(16)).join('');
     const newLog: VerificationLog = {
@@ -234,7 +236,9 @@ function App() {
       browser: ['Chrome 126', 'Safari Mobile', 'Firefox 125', 'Edge 124'][Math.floor(Math.random()*4)],
       method,
       status,
-      riskScore: score
+      riskScore: score,
+      flags: flags || [],
+      deviceAnomalies: deviceAnomalies || []
     };
 
     setLogs((prev) => {
@@ -250,7 +254,7 @@ function App() {
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard config={config} logs={logs} />;
+        return <Dashboard config={config} logs={logs} onAddLog={handleAddLog} />;
       case 'playground':
         return <WidgetPlayground config={config} onAddLog={handleAddLog} />;
       case 'logs':
