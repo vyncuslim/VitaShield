@@ -76,6 +76,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const fingerprint = telemetry.fingerprint || {};
     const behavior = telemetry.behavior || {};
+    const mouseEvents = behavior.mouseEventsCount || 0;
+    const keyPresses = behavior.keyPressesCount || 0;
+    const scrolls = behavior.scrollsCount || 0;
     const clientIp = ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
     const userAgent = fingerprint.userAgent || req.headers['user-agent'] || '';
 
