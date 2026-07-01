@@ -3,6 +3,7 @@ import { VerificationWidget } from './VerificationWidget/VerificationWidget';
 import { useBehaviorTracker } from './VerificationWidget/useBehaviorTracker';
 import { MATRIX_CATEGORIES } from './SystemSpecs';
 import { evaluateTelemetry } from '../lib/riskEngine';
+import { DailyCheckinWidget } from './DailyCheckinWidget';
 
 interface MarketingPortalProps {
   onEnterConsole: () => void;
@@ -281,6 +282,51 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
               VitaShield is a modern, <strong>AI-Native Human Verification Infrastructure</strong>.
               We merge behavioral biometrics, device fingerprinting, and proprietary heuristics to silently analyze traffic without client friction.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── VitaShield Beta Daily Check-in ───────────────────────────────── */}
+      <section id="daily-checkin" style={{ ...styles.section, paddingTop: '3rem', paddingBottom: '3rem' }}>
+        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1.4fr)', gap: '40px', alignItems: 'center' }}>
+
+            {/* Left: Text */}
+            <div>
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)',
+                borderRadius: '20px', padding: '5px 14px', marginBottom: '16px',
+              }}>
+                <span style={{ fontSize: '12px', color: '#a855f7', fontWeight: 700, letterSpacing: '0.06em' }}>🧪 BETA PROGRAM</span>
+              </div>
+              <h2 style={{ color: '#fff', fontSize: '1.6rem', fontWeight: 800, margin: '0 0 12px', lineHeight: 1.3 }}>
+                Help Train the Future of<br />
+                <span style={{ background: 'linear-gradient(135deg, #a855f7, #00f2fe)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                  Human Verification AI
+                </span>
+              </h2>
+              <p style={{ color: '#64748b', fontSize: '14px', lineHeight: 1.7, margin: '0 0 20px' }}>
+                每天完成一个 10 秒小挑战，你的自然行为数据将帮助 VitaShield 更好地区分真实人类与 AI Bot。
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {[
+                  { icon: '🖱️', text: '收集真实鼠标轨迹、点击节奏、反应时间' },
+                  { icon: '🧠', text: '训练 VitaShield 行为识别 AI 模型' },
+                  { icon: '🎁', text: '连续 4 天 → 免费获得 Neuro Plan 3 个月' },
+                  { icon: '🔒', text: '数据严格保密，不出售给第三方 (PDPA 合规)' },
+                ].map((item, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '16px', width: '24px', textAlign: 'center' }}>{item.icon}</span>
+                    <span style={{ color: '#94a3b8', fontSize: '13px' }}>{item.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right: Widget */}
+            <DailyCheckinWidget />
+
           </div>
         </div>
       </section>
