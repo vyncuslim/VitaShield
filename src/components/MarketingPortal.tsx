@@ -740,7 +740,7 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
                   transition: 'all 0.25s ease'
                 }}
               >
-                {cat.id === 'vitashield' ? '🛡️ ' : ''}{cat.title.split(' (')[0]}
+                {cat.title.split(' (')[0]}
               </button>
             ))}
           </div>

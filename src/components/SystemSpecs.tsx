@@ -155,7 +155,7 @@ export const MATRIX_CATEGORIES = [
   },
   {
     id: 'vitashield',
-    title: '🛡️ VitaShield Proprietary Heuristics',
+    title: '🛡️ 🛡️ VitaShield Proprietary Heuristics',
     description: 'Our proprietary algorithms designed specifically to counter advanced human-mimicking AI Agents and bot automation scripts.',
     methods: [
       { name: 'Sub-pixel Jitter Bio-noise Mapping', desc: 'Analyze cursor streams for sub-pixel physiological tremors. Script paths lack these micro-vibrations.', power: 'Maximum', difficulty: 'Medium' },
@@ -492,7 +492,7 @@ Content-Type: application/json`}
                       transition: 'all 0.25s ease'
                     }}
                   >
-                    {cat.id === 'vitashield' ? '🛡️ ' : ''}{cat.title.split(' (')[0]}
+                    {cat.title.split(' (')[0]}
                   </button>
                 ))}
               </div>
