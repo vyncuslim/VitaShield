@@ -196,7 +196,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthSuccess, onBackToH
         {errorMsg && <div style={styles.alertError}>{errorMsg}</div>}
         {successMsg && <div style={styles.alertSuccess}>{successMsg}</div>}
 
-        <form onSubmit={handleAuthSubmit} style={styles.form}>
+        <form noValidate onSubmit={handleAuthSubmit} style={styles.form}>
           <div className="input-group">
             <label className="input-label">Email Address</label>
             <input 

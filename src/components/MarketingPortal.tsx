@@ -479,6 +479,7 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
         <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', marginTop: '2rem' }}>
           {/* Left Panel: The Form */}
           <form 
+            noValidate
             onSubmit={(e) => {
               e.preventDefault();
               const formData = new FormData(e.currentTarget);
