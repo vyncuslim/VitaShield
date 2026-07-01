@@ -83,15 +83,15 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthSuccess, onBackToH
       const fingerprint = decoded.fingerprint || {};
       const behavior = decoded.behavior || {};
 
-      // Flag bot if WebDriver is active or zero mouse coordinates tracked on desktop
-      if (fingerprint.webdriverActive) {
+      // Flag bot if WebDriver is active or zero mouse coordinates tracked on desktop (unless challenge already solved)
+      if (fingerprint.webdriverActive && !behavior.challengeSolved) {
         isSuspicious = true;
       }
-      if ((behavior.mouseEventsCount || 0) === 0 && !isMobile) {
+      if ((behavior.mouseEventsCount || 0) === 0 && !isMobile && !behavior.challengeSolved) {
         isSuspicious = true;
       }
       // Speed check: suspicious if form filled and submitted under 400ms
-      if ((behavior.durationMs || 0) < 400) {
+      if ((behavior.durationMs || 0) < 400 && !behavior.challengeSolved) {
         isSuspicious = true;
       }
     } catch (err) {

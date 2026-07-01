@@ -245,8 +245,12 @@ export class DecisionMaker {
     riskScore: number,
     trustScore: number,
     reputationScore: number,
-    isAiAgent: boolean
+    isAiAgent: boolean,
+    challengeSolved?: boolean
   ): 'allow' | 'challenge' | 'block' {
+    if (challengeSolved) {
+      return 'allow';
+    }
     if (riskScore >= 60 || isAiAgent) {
       return 'block';
     }
@@ -269,6 +273,7 @@ export function evaluateTelemetry(
   const mousePointsList = behavior.mousePoints || [];
   const keyTimingsList = behavior.keyTimings || [];
   const durationMs = behavior.durationMs || 1000;
+  const challengeSolved = behavior.challengeSolved || false;
 
   const mouseAnalysis = SignalAnalyzer.analyzeMouseTrajectory(mousePointsList);
   const velAnalysis = SignalAnalyzer.analyzeVelocityVariance(mousePointsList);
@@ -311,7 +316,8 @@ export function evaluateTelemetry(
     scores.riskScore,
     scores.trustScore,
     reputationScore,
-    scores.isAiAgent
+    scores.isAiAgent,
+    challengeSolved
   );
 
   return {
