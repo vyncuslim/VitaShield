@@ -179,7 +179,7 @@ const Task1ClickRobots: React.FC<{ onComplete: (r: Partial<TaskResult>) => void 
 
   const CARDS_INIT: Card[] = shuffle([
     { id: 0, isRobot: true,  emoji: '🤖', clicked: false, correct: null },
-    { id: 1, isRobot: true,  emoji: '🦾', clicked: false, correct: null },
+    { id: 1, isRobot: true,  emoji: '👾', clicked: false, correct: null },
     { id: 2, isRobot: true,  emoji: '⚙️', clicked: false, correct: null },
     { id: 3, isRobot: false, emoji: '👩', clicked: false, correct: null },
     { id: 4, isRobot: false, emoji: '👨', clicked: false, correct: null },
@@ -243,24 +243,24 @@ const Task1ClickRobots: React.FC<{ onComplete: (r: Partial<TaskResult>) => void 
             style={{
               padding: '16px 12px',
               background: card.clicked
-                ? (card.correct ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.2)')
+                ? (card.correct ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)')
                 : 'rgba(255,255,255,0.05)',
               border: card.clicked
-                ? (card.correct ? '2px solid #ef4444' : '2px solid #10b981')
+                ? (card.correct ? '2px solid #10b981' : '2px solid #ef4444')
                 : '2px solid rgba(255,255,255,0.1)',
               borderRadius: '14px', cursor: card.clicked ? 'default' : 'pointer',
               transition: 'all 0.2s', display: 'flex', flexDirection: 'column',
               alignItems: 'center', gap: '6px',
               transform: card.clicked ? 'scale(0.95)' : 'scale(1)',
               boxShadow: card.clicked
-                ? (card.correct ? '0 0 16px rgba(239,68,68,0.3)' : '0 0 16px rgba(16,185,129,0.3)')
+                ? (card.correct ? '0 0 16px rgba(16,185,129,0.3)' : '0 0 16px rgba(239,68,68,0.3)')
                 : 'none',
             }}
           >
             <span style={{ fontSize: '28px' }}>{card.emoji}</span>
             <span style={{ fontSize: '10px', color: '#64748b', fontWeight: 600 }}>
               {card.clicked
-                ? (card.correct ? '🎯 ROBOT' : '✓ HUMAN')
+                ? (card.correct ? '✓ ROBOT' : '✗ HUMAN')
                 : '???'}
             </span>
           </button>
