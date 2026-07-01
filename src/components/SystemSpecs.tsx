@@ -174,7 +174,7 @@ export const MATRIX_CATEGORIES = [
     ]
   }
 ];export const SystemSpecs: React.FC = () => {
-  const [activeSpecTab, setActiveSpecTab] = useState<'blueprint' | 'supabase' | 'api' | 'matrix'>('blueprint');
+  const [activeSpecTab, setActiveSpecTab] = useState<'blueprint' | 'supabase' | 'api' | 'matrix'>('matrix');
   const [activeMatrixCategory, setActiveMatrixCategory] = useState<string>('behavioral');
 
   return (
@@ -212,7 +212,7 @@ export const MATRIX_CATEGORIES = [
             onClick={() => setActiveSpecTab('matrix')} 
             style={{ ...styles.tabBtn, ...(activeSpecTab === 'matrix' ? styles.tabBtnActive : {}) }}
           >
-            Defense Methods Matrix
+            Defense Capability Matrix
           </button>
         </div>
 
@@ -463,10 +463,10 @@ Content-Type: application/json`}
           </div>
         )}
 
-        {/* Tab 4: Defense Methods Matrix */}
+        {/* Tab 4: Defense Capability Matrix */}
         {activeSpecTab === 'matrix' && (
           <div style={styles.specBody}>
-            <h2 style={styles.specHeaderTitle}>Defense Methods Matrix</h2>
+            <h2 style={styles.specHeaderTitle}>Defense Capability Matrix</h2>
             <p style={styles.specDesc}>
               VitaShield aggregates all industry-standard verification mechanisms alongside our proprietary biological kinetics behavioral checks.
             </p>
