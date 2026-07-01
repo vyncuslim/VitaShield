@@ -55,6 +55,18 @@
     let keyTimings = [];
     let lastKeyTime = 0;
     let lastMouseMoveTime = 0;
+    let permissionQueryMismatch = false;
+
+    // Check permissions API asynchronously
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'notifications' })
+        .then((permissionStatus) => {
+          if (typeof Notification !== 'undefined' && Notification.permission === 'denied' && permissionStatus.state === 'prompt') {
+            permissionQueryMismatch = true;
+          }
+        })
+        .catch(() => {});
+    }
 
     const getWebGLRenderer = () => {
       try {
@@ -80,7 +92,19 @@
         pluginsCount: navigator.plugins ? navigator.plugins.length : 0,
         webglRenderer: getWebGLRenderer(),
         outerDimensionsZeroed: (window.outerWidth === 0 && window.outerHeight === 0),
-        isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+        isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+        chromeRuntimeMissing: /chrome/i.test(navigator.userAgent) && (!window.chrome || !window.chrome.runtime),
+        pluginsArrayEmpty: !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && (!navigator.plugins || navigator.plugins.length === 0),
+        languagesEmpty: !navigator.languages || navigator.languages.length === 0,
+        permissionQueryMismatch: permissionQueryMismatch,
+        webdriverSpoofed: (() => {
+          try {
+            const desc = Object.getOwnPropertyDescriptor(Navigator.prototype, 'webdriver');
+            if (desc && desc.get && desc.get.toString().indexOf('[native code]') === -1) return true;
+            if (Object.prototype.hasOwnProperty.call(navigator, 'webdriver')) return true;
+            return false;
+          } catch(e) { return false; }
+        })()
       },
       behavior: {
         mouseEventsCount: 0,

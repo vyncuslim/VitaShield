@@ -9,6 +9,11 @@ export interface TelemetryFingerprint {
   webglRenderer: string;
   outerDimensionsZeroed: boolean;
   isMobile: boolean;
+  chromeRuntimeMissing?: boolean;
+  pluginsArrayEmpty?: boolean;
+  languagesEmpty?: boolean;
+  permissionQueryMismatch?: boolean;
+  webdriverSpoofed?: boolean;
 }
 
 export interface TelemetryBehavior {

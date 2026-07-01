@@ -142,6 +142,28 @@ export class ScoreCalculator {
       riskScore += 45;
       deviceAnomalies.push('navigator_webdriver_active');
     }
+    if (fingerprint.webdriverSpoofed === true) {
+      isAiAgent = true;
+      riskScore += 45;
+      deviceAnomalies.push('navigator_webdriver_spoofed');
+    }
+    if (fingerprint.chromeRuntimeMissing === true) {
+      riskScore += 25;
+      deviceAnomalies.push('chrome_runtime_object_missing');
+    }
+    if (fingerprint.pluginsArrayEmpty === true) {
+      riskScore += 20;
+      deviceAnomalies.push('desktop_plugins_array_empty');
+    }
+    if (fingerprint.languagesEmpty === true) {
+      riskScore += 20;
+      deviceAnomalies.push('navigator_languages_empty');
+    }
+    if (fingerprint.permissionQueryMismatch === true) {
+      isAiAgent = true;
+      riskScore += 35;
+      deviceAnomalies.push('permission_notifications_discrepancy');
+    }
 
     const webglRenderer = fingerprint.webglRenderer || '';
     if (webglRenderer) {

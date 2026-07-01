@@ -14,8 +14,20 @@ export const useBehaviorTracker = () => {
   const backspaceCount = useRef<number>(0);
   const lastPasteTime = useRef<number>(0);
   const lastMouseMoveTime = useRef<number>(0);
+  const permissionQueryMismatch = useRef<boolean>(false);
 
   useEffect(() => {
+    // Check permission query mismatch (headless browser signature)
+    if (navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'notifications' as any })
+        .then((permissionStatus) => {
+          if (typeof Notification !== 'undefined' && Notification.permission === 'denied' && permissionStatus.state === 'prompt') {
+            permissionQueryMismatch.current = true;
+          }
+        })
+        .catch(() => {});
+    }
+
     const handleMouseMove = (e: MouseEvent) => {
       lastMouseMoveTime.current = Date.now();
       mouseEventsCount.current++;
@@ -72,6 +84,22 @@ export const useBehaviorTracker = () => {
 
   const getTelemetryToken = (): string => {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isWebdriverSpoofed = () => {
+      try {
+        const desc = Object.getOwnPropertyDescriptor(Navigator.prototype, 'webdriver');
+        if (desc && desc.get && desc.get.toString().indexOf('[native code]') === -1) {
+          return true;
+        }
+        if (Object.prototype.hasOwnProperty.call(navigator, 'webdriver')) {
+          return true;
+        }
+        return false;
+      } catch (e) {
+        return false;
+      }
+    };
+    const webdriverSpoofed = isWebdriverSpoofed();
+
     const payload: TelemetryPayload = {
       fingerprint: {
         userAgent: navigator.userAgent,
@@ -83,7 +111,12 @@ export const useBehaviorTracker = () => {
         pluginsCount: navigator.plugins ? navigator.plugins.length : 0,
         webglRenderer: getWebGLRenderer(),
         outerDimensionsZeroed: (window.outerWidth === 0 && window.outerHeight === 0),
-        isMobile
+        isMobile,
+        chromeRuntimeMissing: /chrome/i.test(navigator.userAgent) && (!(window as any).chrome || !(window as any).chrome.runtime),
+        pluginsArrayEmpty: !isMobile && (!navigator.plugins || navigator.plugins.length === 0),
+        languagesEmpty: !navigator.languages || navigator.languages.length === 0,
+        permissionQueryMismatch: permissionQueryMismatch.current,
+        webdriverSpoofed
       },
       behavior: {
         mouseEventsCount: mouseEventsCount.current,
