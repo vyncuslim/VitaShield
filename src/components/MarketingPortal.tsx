@@ -817,7 +817,7 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
                   {"<script "}
                   <span style={{ color: '#fbbf24' }}>src</span>
                   {"="}
-                  <span style={{ color: '#34d399' }}>"https://cdn.vitashield.sleepsomno.com/shield/v1/widget.js"</span>
+                  <span style={{ color: '#34d399' }}>"https://vitashield.sleepsomno.com/widget.js"</span>
                   {" async defer></script>"}
                 </div>
                 <br />
@@ -907,7 +907,7 @@ app.post('/submit', async (req, res) => {
   const token = req.body['vms-shield-token'];
   
   // Call secure verification route
-  const verify = await fetch('https://api.vitashield.sleepsomno.com/v1/verify', {
+  const verify = await fetch('https://vitashield.sleepsomno.com/api/verify', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -930,7 +930,7 @@ app.post('/submit', async (req, res) => {
 import requests
 
 def verify_session(token, client_ip):
-    url = "https://api.vitashield.sleepsomno.com/v1/verify"
+    url = "https://vitashield.sleepsomno.com/api/verify"
     payload = {
         "secret": "vms_sec_live_9c0f73b18274d8a21f7c",
         "token": token,
@@ -952,14 +952,14 @@ func verifyToken(token string, ip string) bool {
         "ip":     ip,
     }
     body, _ := json.Marshal(payload)
-    resp, err := client.Post("https://api.vitashield.sleepsomno.com/v1/verify", "application/json", bytes.NewBuffer(body))
+    resp, err := client.Post("https://vitashield.sleepsomno.com/api/verify", "application/json", bytes.NewBuffer(body))
     // Decode and parse risk_score ...
     return riskScore < 60
 }`}</pre>
                 )}
                 {docsTab === 'curl' && (
                   <pre style={{ margin: 0 }}>{`# Shell verify script curl query
-curl -X POST https://api.vitashield.sleepsomno.com/v1/verify \\
+curl -X POST https://vitashield.sleepsomno.com/api/verify \\
   -H "Content-Type: application/json" \\
   -d '{
     "secret": "vms_sec_live_9c0f73b18274d8a21f7c",

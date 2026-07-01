@@ -27,7 +27,7 @@ For traditional multipage static HTML forms, inject the CDN script and place the
 </form>
 
 <!-- 2. Embed the SDK script at the bottom of the body -->
-<script src="https://cdn.vitashield.sleepsomno.com/widget.js" defer></script>
+<script src="https://vitashield.sleepsomno.com/widget.js" defer></script>
 ```
 
 #### How it works:
@@ -110,7 +110,7 @@ Once your server-side handler intercepts the submitted form, fetch our API gatew
 
 ### Endpoint Specifications
 *   **Method**: `POST`
-*   **Gateway URL**: `https://api.vitashield.sleepsomno.com/v1/verify`
+*   **Gateway URL**: `https://vitashield.sleepsomno.com/api/verify`
 *   **Headers**: `Content-Type: application/json`
 
 ### Request Body

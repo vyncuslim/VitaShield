@@ -21,16 +21,15 @@
           "raw": "{\n  \"secret\": \"vms_sec_live_your_private_secret_key\",\n  \"token\": \"vmt_live_token_base64_telemetry_here\",\n  \"ip\": \"203.0.113.195\"\n}"
         },
         "url": {
-          "raw": "https://api.vitashield.sleepsomno.com/v1/verify",
+          "raw": "https://vitashield.sleepsomno.com/api/verify",
           "protocol": "https",
           "host": [
-            "api",
             "vitashield",
             "sleepsomno",
             "com"
           ],
           "path": [
-            "v1",
+            "api",
             "verify"
           ]
         },

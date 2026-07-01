@@ -35,7 +35,7 @@
 
 ```html
 <!-- 1. 引入防禦 SDK -->
-<script src="https://cdn.vitashield.sleepsomno.com/widget.js" defer></script>
+<script src="https://vitashield.sleepsomno.com/widget.js" defer></script>
 
 <!-- 2. 在表單內放置驗證容器 -->
 <form id="login-form" action="/login" method="POST">
@@ -55,7 +55,7 @@
 #### 2. 後端驗證 API (POST /v1/verify)
 當您的伺服器接收到表單請求時，將收到的 `vms-shield-token` 發送到 VitaShield API 進行二次校驗：
 
-*   **請求端點**：`POST https://api.vitashield.sleepsomno.com/v1/verify`
+*   **請求端點**：`POST https://vitashield.sleepsomno.com/api/verify`
 *   **請求 Body**：
     ```json
     {
@@ -117,7 +117,7 @@ Include the defense script in your HTML and place the verification target div in
 
 ```html
 <!-- Include SDK -->
-<script src="https://cdn.vitashield.sleepsomno.com/widget.js" defer></script>
+<script src="https://vitashield.sleepsomno.com/widget.js" defer></script>
 
 <!-- Place verification placeholder inside form -->
 <form id="signup-form" action="/register" method="POST">
@@ -131,7 +131,7 @@ Include the defense script in your HTML and place the verification target div in
 #### 2. Backend Verification (POST /v1/verify)
 Send the token submitted by the form (`vms-shield-token`) to the verification API:
 
-*   **Endpoint**: `POST https://api.vitashield.sleepsomno.com/v1/verify`
+*   **Endpoint**: `POST https://vitashield.sleepsomno.com/api/verify`
 *   **Payload**:
     ```json
     {
