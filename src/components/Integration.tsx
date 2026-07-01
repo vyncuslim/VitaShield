@@ -34,14 +34,14 @@ export const Integration: React.FC = () => {
   <input type="password" name="password" placeholder="Password" required />
 
   <!-- VitaShield Widget Container -->
-  <div id="vitamind-shield-widget" data-sitekey="${keys.publicKey}"></div>
+  <div id="vitashield-widget" data-sitekey="${keys.publicKey}"></div>
 
   <button type="submit">Submit Securely</button>
 </form>
 
 <script>
   // Optional: Listen for verification success
-  document.getElementById('vitamind-shield-widget')
+  document.getElementById('vitashield-widget')
     .addEventListener('vms-verified', (event) => {
       console.log('Verification token generated:', event.detail.token);
     });
@@ -70,7 +70,7 @@ app.post('/login', async (req, res) => {
 
   const result = await response.json();
 
-  if (result.success && result.risk_score < 0.7) {
+  if (result.success && result.scores.risk_score < 60) {
     // Proceed with authentication login logic
     res.send({ status: 'Success', user: req.body.username });
   } else {
@@ -96,7 +96,7 @@ def verify_shield_token(token, client_ip):
         result = response.json()
         
         # Check pass status and risk score thresholds
-        if result.get("success") and result.get("risk_score", 1.0) < 0.7:
+        if result.get("success") and result.get("scores", {}).get("risk_score", 100) < 60:
             return True, result
         return False, result
     except requests.RequestException as e:
@@ -141,7 +141,7 @@ func verifyToken(token, ip string) (bool, error) {
 
     var result VerifyResponse
     json.NewDecoder(resp.Body).Decode(&result)
-    return result.Success && result.RiskScore < 0.7, nil
+    return result.Success && result.RiskScore < 60, nil
 }`,
 
     java: `import java.net.URI;
@@ -191,7 +191,7 @@ function verifyShieldToken($token, $ip) {
     if ($result === FALSE) { return false; }
 
     $response = json_decode($result, true);
-    return $response['success'] === true && $response['risk_score'] < 0.7;
+    return $response['success'] === true && ($response['scores']['risk_score'] ?? 100) < 60;
 }
 ?>`,
 

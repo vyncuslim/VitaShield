@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/v1/verify",
+      "destination": "/api/verify"
+    },
+    {
+      "source": "/shield/v1/widget.js",
+      "destination": "/widget.js"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

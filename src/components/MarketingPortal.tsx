@@ -849,7 +849,7 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
                   {"<div "}
                   <span style={{ color: '#fbbf24' }}>id</span>
                   {"="}
-                  <span style={{ color: '#34d399' }}>"vitamind-shield-widget"</span>
+                  <span style={{ color: '#34d399' }}>"vitashield-widget"</span>
                   {" "}
                   <span style={{ color: '#fbbf24' }}>data-sitekey</span>
                   {"="}

@@ -52,8 +52,10 @@
 ```
 *SDK 將在表單提交時自動採集遙測數據，並注入隱藏輸入框 `<input type="hidden" name="vms-shield-token" />`。*
 
-#### 2. 後端驗證 API (POST /v1/verify)
+#### 2. 後端驗證 API (POST /api/verify)
 當您的伺服器接收到表單請求時，將收到的 `vms-shield-token` 發送到 VitaShield API 進行二次校驗：
+
+> **提示**：`/v1/verify` 也可作為別名使用，兩者等效。
 
 *   **請求端點**：`POST https://vitashield.sleepsomno.com/api/verify`
 *   **請求 Body**：
@@ -128,7 +130,7 @@ Include the defense script in your HTML and place the verification target div in
 </form>
 ```
 
-#### 2. Backend Verification (POST /v1/verify)
+#### 2. Backend Verification (POST /api/verify)
 Send the token submitted by the form (`vms-shield-token`) to the verification API:
 
 *   **Endpoint**: `POST https://vitashield.sleepsomno.com/api/verify`

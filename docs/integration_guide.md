@@ -104,7 +104,9 @@ export const SignupForm = () => {
 
 ---
 
-## 2. Backend Token Verification (POST /v1/verify)
+## 2. Backend Token Verification (POST /api/verify)
+
+> **Note**: `/v1/verify` is also supported as an alias — both paths are equivalent.
 
 Once your server-side handler intercepts the submitted form, fetch our API gateway to verify the authenticity of the client-side telemetry token:
 

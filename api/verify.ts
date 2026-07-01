@@ -184,6 +184,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({
       success: true,
       decision,
+      // Flat aliases for backwards compatibility (integrators using result.risk_score)
+      risk_score: riskScore,
+      trust_score: trustScore,
       scores: {
         risk_score: riskScore,
         trust_score: trustScore,

@@ -236,7 +236,7 @@ export class ScoreCalculator {
       trustScore -= 15;
       behaviorFlags.push('zero_keystroke_cadence');
     }
-    if (scrolls === 0) {
+    if (scrolls === 0 && !fingerprint.isMobile) {
       trustScore -= 10;
       behaviorFlags.push('no_page_scroll_activity');
     }
