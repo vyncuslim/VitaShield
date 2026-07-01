@@ -111,6 +111,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       deviceAnomalies,
       behaviorFlags,
       networkFlags,
+      consistencyFlags,
+      overSpoofingFlags,
       decision: engineDecision,
       dimensionScores
     } = evaluation;
@@ -160,6 +162,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                   webdriver: fingerprint.webdriverActive,
                   deviceAnomalies,
                   networkFlags,
+                  consistencyFlags,
+                  overSpoofingFlags,
                   reputationScore
                 },
                 behavior_metrics: {
@@ -182,8 +186,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({
       success: true,
       decision,
-      engine_version: 'v2.1',
-      // Flat aliases for backwards compatibility (integrators using result.risk_score)
+      engine_version: 'v2.2',
+      // Flat aliases for backwards compatibility
       risk_score: riskScore,
       trust_score: trustScore,
       scores: {
@@ -193,20 +197,25 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       },
       // Granular dimension scores (Report §2.2.3)
       dimension_scores: {
-        device_risk: dimensionScores.deviceRisk,
-        behavior_risk: dimensionScores.behaviorRisk,
-        network_risk: dimensionScores.networkRisk,
-        biometric_risk: dimensionScores.biometricRisk,
-        sensor_risk: dimensionScores.sensorRisk,
+        device_risk:         dimensionScores.deviceRisk,
+        behavior_risk:       dimensionScores.behaviorRisk,
+        network_risk:        dimensionScores.networkRisk,
+        biometric_risk:      dimensionScores.biometricRisk,
+        sensor_risk:         dimensionScores.sensorRisk,
+        consistency_risk:    dimensionScores.consistencyRisk,
+        over_spoofing_risk:  dimensionScores.overSpoofingRisk,
       },
       detection_details: {
-        is_ai_agent: isAiAgent,
-        agent_type: agentType,
-        device_anomalies: deviceAnomalies,
-        behavior_flags: behaviorFlags,
-        network_flags: networkFlags
+        is_ai_agent:        isAiAgent,
+        agent_type:         agentType,
+        device_anomalies:   deviceAnomalies,
+        behavior_flags:     behaviorFlags,
+        network_flags:      networkFlags,
+        // New v2.2 fields
+        consistency_flags:  consistencyFlags,
+        over_spoofing_flags: overSpoofingFlags,
       },
-      // Backwards compatibility elements
+      // Backwards compatibility
       human_score: trustScore,
       risk_level: riskScore >= 60 ? 'high' : riskScore > 20 ? 'medium' : 'low',
       trust_and_reputation: {
