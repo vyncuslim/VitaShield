@@ -1,4 +1,9 @@
 (function () {
+  // ─── VitaShield Widget v2.1 ─────────────────────────────────────────────────
+  // Improvements: mobile sensor telemetry, touch biometrics, canvas fingerprint,
+  // entropy scoring, debug mode, VitaShieldReady callback, hardware fingerprint
+  // ────────────────────────────────────────────────────────────────────────────
+
   function initVitaShield() {
     const startTime = Date.now();
     const container = document.getElementById('vitashield-widget') || document.querySelector('[data-sitekey]');
@@ -13,6 +18,9 @@
     const themePrimary = container.getAttribute('data-theme-primary') || '#00f2fe';
     const themeBg = container.getAttribute('data-theme-bg') || 'rgba(13, 20, 35, 0.55)';
     const themeText = container.getAttribute('data-theme-text') || '#94a3b8';
+    const debugMode = container.getAttribute('data-debug') === 'true';
+
+    const log = debugMode ? (...args) => console.log('[VitaShield]', ...args) : () => {};
 
     // 1. Render the initial Premium Silent Shield Badge
     const renderDefaultBadge = () => {
@@ -21,36 +29,33 @@
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          padding: 8px 12px;
+          padding: 7px 14px;
           background: ${themeBg};
-          border: 1px solid ${themePrimary}3d;
+          border: 1px solid ${themePrimary}4a;
           border-radius: 8px;
-          color: ${themeText};
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          font-size: 11px;
-          font-weight: 600;
-          backdrop-filter: blur(4px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-          transition: all 0.3s ease;
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          box-shadow: 0 0 14px ${themePrimary}1a;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          user-select: none;
         ">
-          <span style="
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: ${themePrimary};
-            box-shadow: 0 0 8px ${themePrimary};
-            display: inline-block;
-          "></span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="${themePrimary}" stroke-width="2.5" style="margin-top: -1px;">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${themePrimary}" stroke-width="2.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
-          <span>Protected by <strong style="color: #fff; font-weight: 700;">VitaShield</strong></span>
+          <span style="font-size: 11px; color: ${themeText}; font-weight: 600; letter-spacing: 0.02em;">Protected by VitaShield</span>
+          <svg id="vms-spinner" xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="${themePrimary}" stroke-width="3" style="animation: vms-spin 1.2s linear infinite; opacity:0.7;">
+            <path d="M12 2a10 10 0 0 1 10 10"/>
+          </svg>
         </div>
+        <style>
+          @keyframes vms-spin { to { transform: rotate(360deg); } }
+        </style>
       `;
     };
 
     renderDefaultBadge();
 
+    // 2. Telemetry state variables
     let mousePoints = [];
     let keyTimings = [];
     let lastKeyTime = 0;
@@ -64,12 +69,21 @@
     let scrollTimings = [];
     let lastScrollTime = 0;
 
+    // === Mobile sensor state ===
+    let touchEvents = [];
+    let touchEventsCount = 0;
+    let motionSamples = [];
+    let orientationSamples = [];
+    let sensorAvailable = false;
+    let sensorIsStatic = false;
+
     // Check permissions API asynchronously
     if (navigator.permissions && navigator.permissions.query) {
       navigator.permissions.query({ name: 'notifications' })
         .then((permissionStatus) => {
           if (typeof Notification !== 'undefined' && Notification.permission === 'denied' && permissionStatus.state === 'prompt') {
             permissionQueryMismatch = true;
+            log('Permission mismatch detected');
           }
         })
         .catch(() => {});
@@ -80,15 +94,40 @@
         const canvas = document.createElement('canvas');
         const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
         if (!gl) return '';
-        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-        if (!debugInfo) return '';
-        return gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || '';
-      } catch (e) {
-        return '';
-      }
+        const ext = gl.getExtension('WEBGL_debug_renderer_info');
+        if (!ext) return '';
+        return gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) || '';
+      } catch (e) { return ''; }
     };
 
-    let telemetry = {
+    const getCanvasFingerprint = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 200; canvas.height = 50;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return '';
+        ctx.textBaseline = 'top';
+        ctx.font = "14px Arial";
+        ctx.fillStyle = '#f60';
+        ctx.fillRect(125, 1, 62, 20);
+        ctx.fillStyle = '#069';
+        ctx.fillText('VitaShield\u{1F6E1}', 2, 15);
+        ctx.fillStyle = 'rgba(102,204,0,0.7)';
+        ctx.fillText('VitaShield\u{1F6E1}', 4, 17);
+        const raw = canvas.toDataURL();
+        let hash = 0;
+        for (let i = 0; i < raw.length; i++) {
+          hash = ((hash << 5) - hash) + raw.charCodeAt(i);
+          hash |= 0;
+        }
+        return hash.toString(16);
+      } catch (e) { return ''; }
+    };
+
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    // 3. Build initial telemetry fingerprint
+    const telemetry = {
       fingerprint: {
         userAgent: navigator.userAgent,
         screenWidth: window.screen.width || 0,
@@ -99,11 +138,14 @@
         pluginsCount: navigator.plugins ? navigator.plugins.length : 0,
         webglRenderer: getWebGLRenderer(),
         outerDimensionsZeroed: (window.outerWidth === 0 && window.outerHeight === 0),
-        isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+        isMobile,
+        isTablet: /iPad|Android/i.test(navigator.userAgent) && !/Mobile/i.test(navigator.userAgent),
+        touchSupport: navigator.maxTouchPoints > 0,
+        maxTouchPoints: navigator.maxTouchPoints || 0,
         chromeRuntimeMissing: /chrome/i.test(navigator.userAgent) && (!window.chrome || !window.chrome.runtime),
-        pluginsArrayEmpty: !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && (!navigator.plugins || navigator.plugins.length === 0),
+        pluginsArrayEmpty: !isMobile && (!navigator.plugins || navigator.plugins.length === 0),
         languagesEmpty: !navigator.languages || navigator.languages.length === 0,
-        permissionQueryMismatch: permissionQueryMismatch,
+        permissionQueryMismatch: false, // updated async
         webdriverSpoofed: (() => {
           try {
             const desc = Object.getOwnPropertyDescriptor(Navigator.prototype, 'webdriver');
@@ -111,7 +153,11 @@
             if (Object.prototype.hasOwnProperty.call(navigator, 'webdriver')) return true;
             return false;
           } catch(e) { return false; }
-        })()
+        })(),
+        canvasFingerprint: getCanvasFingerprint(),
+        hardwareConcurrency: navigator.hardwareConcurrency || 0,
+        deviceMemory: navigator.deviceMemory || 0,
+        colorDepth: window.screen.colorDepth || 0,
       },
       behavior: {
         mouseEventsCount: 0,
@@ -129,15 +175,31 @@
         clickAnomalies: 0,
         focusChanges: 0,
         tabSwitches: 0,
-        scrollTimings: []
+        scrollTimings: [],
+        touchEvents: [],
+        touchEventsCount: 0,
+        motionSamples: [],
+        orientationSamples: [],
+        sensorAvailable: false,
+        sensorIsStatic: false,
+        mouseEntropyScore: 0,
+        keystrokeEntropyScore: 0,
       }
     };
 
-    // 3. Track events silently
+    // Entropy helper
+    const computeEntropy = (values) => {
+      if (values.length < 4) return 0;
+      const mean = values.reduce((a, b) => a + b, 0) / values.length;
+      const variance = values.reduce((acc, v) => acc + Math.pow(v - mean, 2), 0) / values.length;
+      return Math.round(Math.sqrt(variance) * 100) / 100;
+    };
+
+    // 4. Track events silently
     window.addEventListener('mousemove', (e) => {
       lastMouseMoveTime = Date.now();
       telemetry.behavior.mouseEventsCount++;
-      if (mousePoints.length < 30) {
+      if (mousePoints.length < 50) {
         mousePoints.push({ x: e.clientX, y: e.clientY, t: lastMouseMoveTime });
       }
     }, { passive: true });
@@ -148,7 +210,7 @@
         telemetry.behavior.backspaceCount++;
       }
       const now = Date.now();
-      if (lastKeyTime > 0 && keyTimings.length < 15) {
+      if (lastKeyTime > 0 && keyTimings.length < 20) {
         keyTimings.push(now - lastKeyTime);
       }
       lastKeyTime = now;
@@ -201,7 +263,55 @@
       }
     }, { passive: true });
 
-    // 4. Client-side Slider Challenge mitigation UI
+    // === Mobile Touch Biometrics ===
+    const captureTouchPoint = (e) => {
+      const touch = e.changedTouches && e.changedTouches[0];
+      if (touch && touchEvents.length < 40) {
+        touchEventsCount++;
+        touchEvents.push({
+          x: touch.clientX,
+          y: touch.clientY,
+          t: Date.now(),
+          pressure: touch.force || touch.pressure || 0,
+          radiusX: touch.radiusX || 0,
+          radiusY: touch.radiusY || 0,
+        });
+      }
+    };
+
+    window.addEventListener('touchstart', captureTouchPoint, { passive: true });
+    window.addEventListener('touchmove', captureTouchPoint, { passive: true });
+
+    // === Device Motion (Accelerometer) ===
+    window.addEventListener('devicemotion', (e) => {
+      sensorAvailable = true;
+      const acc = e.accelerationIncludingGravity;
+      if (acc && motionSamples.length < 20) {
+        motionSamples.push({ ax: acc.x || 0, ay: acc.y || 0, az: acc.z || 0, t: Date.now() });
+      }
+    }, { passive: true });
+
+    // === Device Orientation (Gyroscope) ===
+    window.addEventListener('deviceorientation', (e) => {
+      if (orientationSamples.length < 15) {
+        orientationSamples.push({
+          alpha: e.alpha || 0,
+          beta: e.beta || 0,
+          gamma: e.gamma || 0,
+          t: Date.now()
+        });
+      }
+    }, { passive: true });
+
+    // Check if mobile sensor is suspiciously absent → emulated device
+    setTimeout(() => {
+      if (isMobile && !sensorAvailable && navigator.maxTouchPoints > 0) {
+        sensorIsStatic = true;
+        log('Sensor static detected: mobile UA but no motion events');
+      }
+    }, 3000);
+
+    // 5. Client-side Slider Challenge mitigation UI
     const triggerSliderChallenge = (onComplete) => {
       container.innerHTML = `
         <div id="vms-challenge-container" style="
@@ -281,7 +391,7 @@
       const onSuccess = () => {
         telemetry.behavior.challengeSolved = true;
         telemetry.behavior.challengeMethod = 'slider';
-        
+
         container.innerHTML = `
           <div style="
             display: inline-flex;
@@ -303,7 +413,7 @@
             <span>✅ Verification Complete</span>
           </div>
         `;
-        
+
         if (onComplete) onComplete();
       };
 
@@ -316,9 +426,11 @@
       window.addEventListener('touchend', onEnd);
     };
 
-    // 5. Intercept form submission to inspect risk scoring
+    // 6. Intercept form submission to package full telemetry
     if (parentForm) {
       parentForm.addEventListener('submit', function (e) {
+        // Flush accumulated data into telemetry
+        telemetry.fingerprint.permissionQueryMismatch = permissionQueryMismatch;
         telemetry.behavior.mousePoints = mousePoints;
         telemetry.behavior.keyTimings = keyTimings;
         telemetry.behavior.clickCount = clickCount;
@@ -326,16 +438,32 @@
         telemetry.behavior.focusChanges = focusChanges;
         telemetry.behavior.tabSwitches = tabSwitches;
         telemetry.behavior.scrollTimings = scrollTimings;
+        telemetry.behavior.touchEvents = touchEvents;
+        telemetry.behavior.touchEventsCount = touchEventsCount;
+        telemetry.behavior.motionSamples = motionSamples;
+        telemetry.behavior.orientationSamples = orientationSamples;
+        telemetry.behavior.sensorAvailable = sensorAvailable;
+        telemetry.behavior.sensorIsStatic = sensorIsStatic;
 
-        const isSuspicious = telemetry.behavior.mouseEventsCount === 0 && !telemetry.behavior.challengeSolved && !telemetry.fingerprint.isMobile;
+        // Compute entropy scores
+        const mouseDeltas = mousePoints.length > 1
+          ? mousePoints.slice(1).map((p, i) => Math.sqrt(
+              Math.pow(p.x - mousePoints[i].x, 2) + Math.pow(p.y - mousePoints[i].y, 2)
+            ))
+          : [];
+        telemetry.behavior.mouseEntropyScore = computeEntropy(mouseDeltas);
+        telemetry.behavior.keystrokeEntropyScore = computeEntropy(keyTimings);
+
+        const isSuspicious = telemetry.behavior.mouseEventsCount === 0
+          && !telemetry.behavior.challengeSolved
+          && !telemetry.fingerprint.isMobile
+          && telemetry.behavior.touchEventsCount === 0;
 
         if (isSuspicious) {
           e.preventDefault();
           e.stopPropagation();
           triggerSliderChallenge(() => {
-            setTimeout(() => {
-              parentForm.submit();
-            }, 800);
+            setTimeout(() => { parentForm.submit(); }, 800);
           });
           return false;
         }
@@ -352,6 +480,14 @@
         const jsonString = JSON.stringify(telemetry);
         const b64Token = btoa(unescape(encodeURIComponent(jsonString)));
 
+        if (debugMode) {
+          log('Token generated, payload size:', jsonString.length, 'bytes');
+          log('Mouse entropy:', telemetry.behavior.mouseEntropyScore);
+          log('Keystroke entropy:', telemetry.behavior.keystrokeEntropyScore);
+          log('Touch events collected:', touchEventsCount);
+          log('Sensor available:', sensorAvailable, '| static:', sensorIsStatic);
+        }
+
         const oldInput = parentForm.querySelector('input[name="vms-shield-token"]');
         if (oldInput) oldInput.remove();
 
@@ -367,6 +503,14 @@
         container.dispatchEvent(verifiedEvent);
       });
     }
+
+    log('VitaShield initialized. Mobile:', isMobile, '| Debug mode:', debugMode);
+
+    // 7. Fire VitaShieldReady global callback
+    if (typeof window.onVitaShieldReady === 'function') {
+      window.onVitaShieldReady({ version: '2.1', isMobile });
+    }
+    window.dispatchEvent(new CustomEvent('vitashield:ready', { detail: { version: '2.1', isMobile } }));
   }
 
   if (document.readyState === 'loading') {

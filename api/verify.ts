@@ -82,12 +82,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const clientIp = ip || req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
     const userAgent = fingerprint.userAgent || req.headers['user-agent'] || '';
 
-    // 2. Run Risk Engine v2 Layered Security Models using modular library
+    // 2. Run Risk Engine v2 Layered Security Models
+    // Note: Legitimate crawlers (googlebot, bingbot, etc.) are handled by
+    // the whitelist inside evaluateTelemetry() and will always get decision=allow.
     const aiAgentPatterns = [
       /openai/i, /gptbot/i, /chatgpt/i, /chat-gpt/i, /claude/i, /anthropic/i,
-      /google-extended/i, /googlebot/i, /bingbot/i, /crawler/i, /spider/i,
-      /python-urllib/i, /axios/i, /headless/i, /puppeteer/i, /playwright/i,
-      /selenium/i, /webdriver/i, /operator/i
+      /google-extended/i, /python-urllib/i, /axios/i, /headless/i,
+      /puppeteer/i, /playwright/i, /selenium/i, /webdriver/i, /operator/i
     ];
     const isBotUA = aiAgentPatterns.some(pattern => pattern.test(userAgent));
     const hasForwardedFor = !!req.headers['x-forwarded-for'];
@@ -109,16 +110,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       agentType,
       deviceAnomalies,
       behaviorFlags,
-      networkFlags
+      networkFlags,
+      decision: engineDecision,
+      dimensionScores
     } = evaluation;
 
-    // 3. Make Adaptive Gate Decisions
-    let decision: 'allow' | 'challenge' | 'block' = 'allow';
-    if (riskScore >= 60 || isAiAgent) {
-      decision = 'block';
-    } else if (riskScore > 20 || trustScore < 65 || reputationScore < 75) {
-      decision = 'challenge';
-    }
+    // 3. Make Adaptive Gate Decisions (use engine decision, override for challenge logic)
+    let decision: 'allow' | 'challenge' | 'block' = engineDecision;
 
     // 4. Log Session & Telemetry directly to Supabase REST API
     if (SUPABASE_URL && SUPABASE_KEY) {
@@ -184,6 +182,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json({
       success: true,
       decision,
+      engine_version: 'v2.1',
       // Flat aliases for backwards compatibility (integrators using result.risk_score)
       risk_score: riskScore,
       trust_score: trustScore,
@@ -191,6 +190,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         risk_score: riskScore,
         trust_score: trustScore,
         reputation_score: reputationScore
+      },
+      // Granular dimension scores (Report §2.2.3)
+      dimension_scores: {
+        device_risk: dimensionScores.deviceRisk,
+        behavior_risk: dimensionScores.behaviorRisk,
+        network_risk: dimensionScores.networkRisk,
+        biometric_risk: dimensionScores.biometricRisk,
+        sensor_risk: dimensionScores.sensorRisk,
       },
       detection_details: {
         is_ai_agent: isAiAgent,
