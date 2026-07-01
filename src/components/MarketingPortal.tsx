@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { VerificationWidget } from './VerificationWidget/VerificationWidget';
 import { useBehaviorTracker } from './VerificationWidget/useBehaviorTracker';
 import { MATRIX_CATEGORIES } from './SystemSpecs';
+import { evaluateTelemetry } from '../lib/riskEngine';
 
 interface MarketingPortalProps {
   onEnterConsole: () => void;
@@ -44,15 +45,25 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
         const fingerprint = telemetry.fingerprint || {};
         const behavior = telemetry.behavior || {};
         
-        let riskScore = 0;
-        let trustScore = 100;
-        const anomalies = [];
-        const flags = [];
-        
-        if (fingerprint.webdriverActive) {
-          riskScore += 45;
-          anomalies.push('navigator_webdriver_active');
-        }
+        const clientIp = '127.0.0.1';
+        const hasForwardedFor = false;
+        const aiAgentPatterns = [
+          /openai/i, /gptbot/i, /chatgpt/i, /chat-gpt/i, /claude/i, /anthropic/i,
+          /google-extended/i, /googlebot/i, /bingbot/i, /crawler/i, /spider/i,
+          /python-urllib/i, /axios/i, /headless/i, /puppeteer/i, /playwright/i,
+          /selenium/i, /webdriver/i, /operator/i
+        ];
+        const userAgent = fingerprint.userAgent || '';
+        const isBotUA = aiAgentPatterns.some(pattern => pattern.test(userAgent));
+
+        const evaluation = evaluateTelemetry(
+          fingerprint,
+          behavior,
+          clientIp,
+          userAgent,
+          hasForwardedFor,
+          isBotUA
+        );
         
         const mousePoints = behavior.mousePoints || [];
         let straightRatio = 1.25;
@@ -65,11 +76,6 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
           const last = mousePoints[mousePoints.length - 1];
           const straight = Math.sqrt(Math.pow(last.x - first.x, 2) + Math.pow(last.y - first.y, 2));
           straightRatio = pathLen / (straight || 1);
-          if (straightRatio < 1.025) {
-            riskScore += 30;
-            trustScore -= 30;
-            flags.push('perfectly_straight_mouse_trajectory');
-          }
         }
         
         const keyTimings = behavior.keyTimings || [];
@@ -78,38 +84,20 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
           const avg = keyTimings.reduce((a: number, b: number) => a + b, 0) / keyTimings.length;
           const variance = keyTimings.reduce((acc: number, t: number) => acc + Math.pow(t - avg, 2), 0) / keyTimings.length;
           keyStd = Math.sqrt(variance);
-          if (keyStd < 8) {
-            riskScore += 30;
-            trustScore -= 30;
-            flags.push('perfectly_uniform_keystroke_cadence');
-          }
         }
-        
-        if (behavior.durationMs < 450) {
-          riskScore += 35;
-          trustScore -= 30;
-          flags.push('sub_500ms_form_submission_speed');
-        }
-        
-        riskScore = Math.min(Math.max(riskScore, 0), 100);
-        trustScore = Math.min(Math.max(trustScore, 0), 100);
-        
-        let decision = 'allow';
-        if (riskScore >= 60) decision = 'block';
-        else if (riskScore > 20 || trustScore < 65) decision = 'challenge';
         
         setDemoResults({
           success: true,
-          decision,
+          decision: evaluation.decision,
           scores: {
-            risk_score: riskScore,
-            trust_score: trustScore,
-            reputation_score: 95
+            risk_score: evaluation.riskScore,
+            trust_score: evaluation.trustScore,
+            reputation_score: evaluation.reputationScore
           },
           details: {
-            is_ai_agent: false,
-            device_anomalies: anomalies,
-            behavior_flags: flags,
+            is_ai_agent: evaluation.isAiAgent,
+            device_anomalies: evaluation.deviceAnomalies,
+            behavior_flags: evaluation.behaviorFlags.concat(evaluation.networkFlags),
             mouse_straightness: Math.round(straightRatio * 100) / 100,
             key_std_dev: Math.round(keyStd * 10) / 10
           }
