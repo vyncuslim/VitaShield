@@ -56,6 +56,13 @@
     let lastKeyTime = 0;
     let lastMouseMoveTime = 0;
     let permissionQueryMismatch = false;
+    let clickCount = 0;
+    let clickAnomalies = 0;
+    let lastMouseDownTime = 0;
+    let focusChanges = 0;
+    let tabSwitches = 0;
+    let scrollTimings = [];
+    let lastScrollTime = 0;
 
     // Check permissions API asynchronously
     if (navigator.permissions && navigator.permissions.query) {
@@ -117,7 +124,12 @@
         durationMs: 0,
         backspaceCount: 0,
         lastPasteTime: 0,
-        submitPauseMs: 0
+        submitPauseMs: 0,
+        clickCount: 0,
+        clickAnomalies: 0,
+        focusChanges: 0,
+        tabSwitches: 0,
+        scrollTimings: []
       }
     };
 
@@ -148,6 +160,45 @@
 
     window.addEventListener('scroll', () => {
       telemetry.behavior.scrollsCount++;
+      const now = Date.now();
+      if (lastScrollTime > 0 && scrollTimings.length < 15) {
+        scrollTimings.push(now - lastScrollTime);
+      }
+      lastScrollTime = now;
+    }, { passive: true });
+
+    window.addEventListener('mousedown', () => {
+      lastMouseDownTime = Date.now();
+    }, { passive: true });
+
+    window.addEventListener('mouseup', (e) => {
+      clickCount++;
+      if (lastMouseDownTime > 0) {
+        const clickDuration = Date.now() - lastMouseDownTime;
+        if (clickDuration < 5 || clickDuration % 10 === 0) {
+          clickAnomalies++;
+        }
+      }
+      if (e.target && e.target.getBoundingClientRect) {
+        const rect = e.target.getBoundingClientRect();
+        const relX = e.clientX - rect.left;
+        const relY = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        if (Math.abs(relX - centerX) < 0.1 && Math.abs(relY - centerY) < 0.1) {
+          clickAnomalies++;
+        }
+      }
+    }, { passive: true });
+
+    window.addEventListener('focus', () => {
+      focusChanges++;
+    }, { passive: true });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        tabSwitches++;
+      }
     }, { passive: true });
 
     // 4. Client-side Slider Challenge mitigation UI
@@ -270,6 +321,11 @@
       parentForm.addEventListener('submit', function (e) {
         telemetry.behavior.mousePoints = mousePoints;
         telemetry.behavior.keyTimings = keyTimings;
+        telemetry.behavior.clickCount = clickCount;
+        telemetry.behavior.clickAnomalies = clickAnomalies;
+        telemetry.behavior.focusChanges = focusChanges;
+        telemetry.behavior.tabSwitches = tabSwitches;
+        telemetry.behavior.scrollTimings = scrollTimings;
 
         const isSuspicious = telemetry.behavior.mouseEventsCount === 0 && !telemetry.behavior.challengeSolved && !telemetry.fingerprint.isMobile;
 

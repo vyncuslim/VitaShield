@@ -15,6 +15,13 @@ export const useBehaviorTracker = () => {
   const lastPasteTime = useRef<number>(0);
   const lastMouseMoveTime = useRef<number>(0);
   const permissionQueryMismatch = useRef<boolean>(false);
+  const clickCount = useRef<number>(0);
+  const clickAnomalies = useRef<number>(0);
+  const lastMouseDownTime = useRef<number>(0);
+  const focusChanges = useRef<number>(0);
+  const tabSwitches = useRef<number>(0);
+  const scrollTimings = useRef<number[]>([]);
+  const lastScrollTime = useRef<number>(0);
 
   useEffect(() => {
     // Check permission query mismatch (headless browser signature)
@@ -52,20 +59,67 @@ export const useBehaviorTracker = () => {
       lastPasteTime.current = Date.now();
     };
 
+    const handleMouseDown = () => {
+      lastMouseDownTime.current = Date.now();
+    };
+
+    const handleMouseUp = (e: MouseEvent) => {
+      clickCount.current++;
+      if (lastMouseDownTime.current > 0) {
+        const clickDuration = Date.now() - lastMouseDownTime.current;
+        if (clickDuration < 5 || clickDuration % 10 === 0) {
+          clickAnomalies.current++;
+        }
+      }
+      if (e.target instanceof Element) {
+        const rect = e.target.getBoundingClientRect();
+        const relX = e.clientX - rect.left;
+        const relY = e.clientY - rect.top;
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        if (Math.abs(relX - centerX) < 0.1 && Math.abs(relY - centerY) < 0.1) {
+          clickAnomalies.current++;
+        }
+      }
+    };
+
+    const handleFocus = () => {
+      focusChanges.current++;
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        tabSwitches.current++;
+      }
+    };
+
     const handleScroll = () => {
       scrollsCount.current++;
+      const now = Date.now();
+      if (lastScrollTime.current > 0 && scrollTimings.current.length < 15) {
+        scrollTimings.current.push(now - lastScrollTime.current);
+      }
+      lastScrollTime.current = now;
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     window.addEventListener('keydown', handleKeyDown, { passive: true });
     window.addEventListener('paste', handlePaste, { passive: true });
     window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('mousedown', handleMouseDown, { passive: true });
+    window.addEventListener('mouseup', handleMouseUp, { passive: true });
+    window.addEventListener('focus', handleFocus, { passive: true });
+    document.addEventListener('visibilitychange', handleVisibilityChange, { passive: true });
 
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('paste', handlePaste);
       window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
@@ -129,7 +183,12 @@ export const useBehaviorTracker = () => {
         durationMs: Date.now() - startTime.current,
         backspaceCount: backspaceCount.current,
         lastPasteTime: lastPasteTime.current > 0 ? (Date.now() - lastPasteTime.current) : 0,
-        submitPauseMs: lastMouseMoveTime.current > 0 ? (Date.now() - lastMouseMoveTime.current) : 0
+        submitPauseMs: lastMouseMoveTime.current > 0 ? (Date.now() - lastMouseMoveTime.current) : 0,
+        clickCount: clickCount.current,
+        clickAnomalies: clickAnomalies.current,
+        focusChanges: focusChanges.current,
+        tabSwitches: tabSwitches.current,
+        scrollTimings: scrollTimings.current
       }
     };
 

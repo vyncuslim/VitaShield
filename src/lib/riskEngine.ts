@@ -97,6 +97,20 @@ export class SignalAnalyzer {
       sub500ms: durationMs < 450
     };
   }
+
+  static analyzeScrollVariance(scrollTimingsList: number[]): {
+    perfectlyUniform: boolean;
+  } {
+    if (scrollTimingsList.length < 4) {
+      return { perfectlyUniform: false };
+    }
+    const avgDelay = scrollTimingsList.reduce((a, b) => a + b, 0) / scrollTimingsList.length;
+    const variance = scrollTimingsList.reduce((acc, t) => acc + Math.pow(t - avgDelay, 2), 0) / scrollTimingsList.length;
+    const stdDev = Math.sqrt(variance);
+    return {
+      perfectlyUniform: stdDev < 10
+    };
+  }
 }
 
 export class ScoreCalculator {
@@ -225,6 +239,32 @@ export class ScoreCalculator {
     if (scrolls === 0) {
       trustScore -= 10;
       behaviorFlags.push('no_page_scroll_activity');
+    }
+
+    // Advanced Behavioral Matrix Checks
+    const clickAnomalies = behavior.clickAnomalies || 0;
+    if (clickAnomalies > 0) {
+      riskScore += 25 * Math.min(clickAnomalies, 3);
+      trustScore -= 20 * Math.min(clickAnomalies, 3);
+      behaviorFlags.push('robotic_click_alignment_or_duration');
+    }
+
+    const scrollAnalysis = SignalAnalyzer.analyzeScrollVariance(behavior.scrollTimings || []);
+    if (scrollAnalysis.perfectlyUniform) {
+      riskScore += 20;
+      trustScore -= 15;
+      behaviorFlags.push('perfectly_uniform_scroll_intervals');
+    }
+
+    const focusChanges = behavior.focusChanges || 0;
+    const tabSwitches = behavior.tabSwitches || 0;
+    if (focusChanges > 10) {
+      riskScore += 15;
+      behaviorFlags.push('rapid_focus_handshake_patterns');
+    }
+    if (tabSwitches > 4) {
+      riskScore += 20;
+      behaviorFlags.push('excessive_tab_switching_anomaly');
     }
 
     // 4. VitaShield Original Heuristics

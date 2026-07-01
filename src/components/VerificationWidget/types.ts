@@ -28,6 +28,11 @@ export interface TelemetryBehavior {
   backspaceCount?: number;
   lastPasteTime?: number;
   submitPauseMs?: number;
+  clickCount?: number;
+  clickAnomalies?: number;
+  focusChanges?: number;
+  tabSwitches?: number;
+  scrollTimings?: number[];
 }
 
 export interface TelemetryPayload {
