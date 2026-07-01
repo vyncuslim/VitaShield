@@ -15,6 +15,20 @@ export const MarketingPortal: React.FC<MarketingPortalProps> = ({ onEnterConsole
   const [activeMatrixCategory, setActiveMatrixCategory] = useState<string>('behavioral');
   const [docsTab, setDocsTab] = useState<'nodejs' | 'python' | 'go' | 'curl'>('nodejs');
 
+  // Interactive Backend API sandbox states
+  const [mockRiskScore, setMockRiskScore] = useState<number>(12);
+  const [mockWebdriver, setMockWebdriver] = useState<boolean>(false);
+  const [mockStraightMouse, setMockStraightMouse] = useState<boolean>(false);
+  const [mockSwiftshader, setMockSwiftshader] = useState<boolean>(false);
+
+  // Cycle the 4-step flowchart automatically every 4 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveStep((prev) => (prev + 1) % 4);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
   // Real-time live behavior tracker
   const { getTelemetryToken } = useBehaviorTracker();
   const [liveTelemetry, setLiveTelemetry] = useState<any>(null);
@@ -964,6 +978,108 @@ curl -X POST https://api.vitashield.sleepsomno.com/v1/verify \\
     "ip": "1.2.3.4"
   }'`}</pre>
                 )}
+              </div>
+
+              {/* Interactive API Sandbox Simulator */}
+              <div style={{ marginTop: '1.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.08)', paddingTop: '1.5rem' }}>
+                <h5 style={{ fontSize: '0.85rem', color: '#fff', margin: '0 0 8px 0', fontWeight: '800' }}>
+                  Interactive API Response Simulator (模拟 API 响应沙盒)
+                </h5>
+                <p style={{ fontSize: '0.76rem', color: 'var(--text-muted)', marginBottom: '1.25rem', lineHeight: '1.4' }}>
+                  Adjust parameters below to see how the client-side telemetry converts into backend risk decisions and JSON payloads.
+                </p>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: '1.5rem', alignItems: 'start' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {/* Risk Score Slider */}
+                    <div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem', marginBottom: '6px' }}>
+                        <span style={{ color: 'var(--text-muted)' }}>Simulated Risk Score:</span>
+                        <strong style={{ color: mockRiskScore >= 60 ? 'var(--danger)' : mockRiskScore > 20 ? 'var(--warning)' : 'var(--success)' }}>
+                          {mockRiskScore}%
+                        </strong>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={mockRiskScore}
+                        onChange={(e) => setMockRiskScore(Number(e.target.value))}
+                        style={{ width: '100%', accentColor: 'var(--secondary)', cursor: 'pointer' }}
+                      />
+                    </div>
+
+                    {/* Checkboxes */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: '600' }}>Simulated Telemetry Markers:</span>
+                      
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.74rem', color: '#fff', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={mockWebdriver}
+                          onChange={(e) => setMockWebdriver(e.target.checked)}
+                          style={{ accentColor: 'var(--secondary)' }}
+                        />
+                        <span>WebDriver Active (自动化测试)</span>
+                      </label>
+
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.74rem', color: '#fff', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={mockStraightMouse}
+                          onChange={(e) => setMockStraightMouse(e.target.checked)}
+                          style={{ accentColor: 'var(--secondary)' }}
+                        />
+                        <span>Straight Trajectory (匀速直线轨迹)</span>
+                      </label>
+
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.74rem', color: '#fff', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={mockSwiftshader}
+                          onChange={(e) => setMockSwiftshader(e.target.checked)}
+                          style={{ accentColor: 'var(--secondary)' }}
+                        />
+                        <span>SwiftShader GPU (无头虚拟机环境)</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Simulated JSON Panel */}
+                  <div style={{ background: 'rgba(5, 7, 12, 0.95)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '0.75rem 1rem', fontFamily: 'var(--font-mono)', fontSize: '0.72rem', overflowX: 'auto', maxHeight: '185px' }}>
+                    <div style={{ color: 'var(--text-dark)', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '4px', marginBottom: '6px', fontSize: '0.68rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>RESPONSE BODY (JSON)</span>
+                      <span style={{
+                        padding: '1px 6px',
+                        borderRadius: '4px',
+                        fontSize: '9px',
+                        fontWeight: '800',
+                        background: mockRiskScore >= 60 ? 'rgba(239,68,68,0.12)' : mockRiskScore > 20 ? 'rgba(245,158,11,0.12)' : 'rgba(16,185,129,0.12)',
+                        color: mockRiskScore >= 60 ? 'var(--danger)' : mockRiskScore > 20 ? 'var(--warning)' : 'var(--success)'
+                      }}>
+                        {mockRiskScore >= 60 ? 'BLOCK (403)' : mockRiskScore > 20 ? 'CHALLENGE' : 'ALLOW'}
+                      </span>
+                    </div>
+                    <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-all', color: '#38bdf8' }}>
+                      {JSON.stringify({
+                        success: true,
+                        timestamp: new Date().toISOString().split('T')[0] + 'T00:00:00Z',
+                        risk_score: mockRiskScore,
+                        decision: mockRiskScore >= 60 ? 'block' : mockRiskScore > 20 ? 'challenge' : 'allow',
+                        details: {
+                          device_anomalies: [
+                            ...(mockWebdriver ? ['navigator_webdriver_active'] : []),
+                            ...(mockSwiftshader ? ['virtualized_gpu_environment'] : [])
+                          ],
+                          behavior_flags: [
+                            ...(mockStraightMouse ? ['perfectly_straight_mouse_trajectory'] : []),
+                            ...(mockRiskScore > 40 ? ['sub_500ms_form_submission_speed'] : [])
+                          ]
+                        }
+                      }, null, 2)}
+                    </pre>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
